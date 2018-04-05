@@ -98,7 +98,7 @@ class Parser(object):
         """Find the highest numbered block in the database."""
         return 0
 
-    def add_block(self, n):
+    def addBlock(self, n):
         """Add a block to database."""
         b = self.getBlock(n)
         if b:
@@ -143,11 +143,12 @@ class Parser(object):
         # Get all new blocks
         print("Processing remainder of the blockchain...")
         for n in range(self.max_block_EtherDB, self.max_block_geth):
-            self.add_block(n)
+            self.addBlock(n)
 
         print("Done!\n")
 
 
 if __name__ == "__main__":
     parser = Parser()
-    print(parser.getBlock(int(sys.argv[1])))
+    n= 1000000
+    print(parser.getBlock(n))

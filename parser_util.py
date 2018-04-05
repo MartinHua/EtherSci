@@ -74,7 +74,8 @@ def decodeBlock(block):
                 "value": float(int(t["value"], 16))/1000000000000000000.,
                 "gas": int(t["gas"], 16),
                 "gasPrice": int(t["gasPrice"], 16)/10**9,
-                "data": t["input"]
+                "data": t["input"],
+                "blockNum": t["blockNumber"]
             }
             new_block["transactions"].append(new_t)
         return new_block
