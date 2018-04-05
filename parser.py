@@ -157,5 +157,7 @@ class Parser(object):
 
 if __name__ == "__main__":
     parser = Parser()
-    n= 5000000
-    print(parser.getBlock(n))
+    print(time.time())
+    for n in range(5):
+        print(parser.getBlock(n+5000000))
+    print(time.time())
