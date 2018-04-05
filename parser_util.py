@@ -68,8 +68,7 @@ def decodeBlock(block):
             "gasLimit": int(b["gasLimit"], 16),
             "reward": STATICREWARD,
             "miner": b["miner"],
-            "transactions": [],
-            "txFee": 0
+            "transactions": []
         }
         # Filter and decode each transaction and add it back
         # 	Value, gas, and gasPrice are all converted to ether
@@ -82,7 +81,7 @@ def decodeBlock(block):
                 "to": t["to"],
                 "value": float(int(t["value"], 16))/10**18,
                 "gasLimit": int(t["gas"], 16),
-                "gasPrice": int(t["gasPrice"], 16)/10**18,
+                "gasPrice": int(t["gasPrice"], 16)/10**9,
                 "data": t["input"],
                 "blockNum": int(t["blockNumber"], 16)
             }
