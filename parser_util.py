@@ -5,6 +5,7 @@ import os
 
 DB_NAME = "blockchain"
 COLLECTION = "transactions"
+STATICREWARD = 3
 
 # Geth
 # ----
@@ -52,32 +53,42 @@ def decodeBlock(block):
     	}
   	}
     """
+    # return block
     try:
         b = block
         if "result" in block:
             b = block["result"]
         # Filter the block
         new_block = {
-            "number": int(b["number"], 16),
+            "blockNum": int(b["number"], 16),
             "timestamp": int(b["timestamp"], 16),		# Timestamp is in unix time
             "size": int(b["size"], 16),
-            "uncle": len(b["uncles"]),
-            "transactions": []
+            "uncleReward": len(b["uncles"]) * STATICREWARD / 32,
+            "gasUsed": int(b["gasUsed"], 16),
+            "gasLimit": int(b["gasLimit"], 16),
+            "reward": STATICREWARD,
+            "miner": b["miner"],
+            "transactions": [],
+            "txFee": 0
         }
         # Filter and decode each transaction and add it back
         # 	Value, gas, and gasPrice are all converted to ether
+
         for t in b["transactions"]:
             new_t = {
                 "transactionIndex": int(t["transactionIndex"], 16),
+                "txHash": t["hash"],
                 "from": t["from"],
                 "to": t["to"],
-                "value": float(int(t["value"], 16))/1000000000000000000.,
-                "gas": int(t["gas"], 16),
-                "gasPrice": int(t["gasPrice"], 16)/10**9,
+                "value": float(int(t["value"], 16))/10**18,
+                "gasLimit": int(t["gas"], 16),
+                "gasPrice": int(t["gasPrice"], 16)/10**18,
                 "data": t["input"],
-                "blockNum": t["blockNumber"]
+                "blockNum": int(t["blockNumber"], 16)
             }
+
             new_block["transactions"].append(new_t)
+
         return new_block
     except:
         return None
