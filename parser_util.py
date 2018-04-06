@@ -63,6 +63,7 @@ def decodeBlock(block):
             "blockNum": int(b["number"], 16),
             "timestamp": int(b["timestamp"], 16),		# Timestamp is in unix time
             "size": int(b["size"], 16),
+            "uncleNum": len(b["uncles"]),
             "uncleReward": len(b["uncles"]) * STATICREWARD / 32,
             "gasUsed": int(b["gasUsed"], 16),
             "gasLimit": int(b["gasLimit"], 16),
