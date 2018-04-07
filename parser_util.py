@@ -5,7 +5,6 @@ import os
 
 DB_NAME = "blockchain"
 COLLECTION = "transactions"
-STATICREWARD = 3
 
 # Geth
 # ----
@@ -64,13 +63,17 @@ def decodeBlock(block):
             "timestamp": int(b["timestamp"], 16),		# Timestamp is in unix time
             "size": int(b["size"], 16),
             "uncleNum": len(b["uncles"]),
-            "uncleReward": len(b["uncles"]) * STATICREWARD / 32,
             "gasUsed": int(b["gasUsed"], 16),
             "gasLimit": int(b["gasLimit"], 16),
-            "reward": STATICREWARD,
             "miner": b["miner"],
             "transactions": []
         }
+        if new_block["blockNum"] < 4370000:
+            STATICREWARD = 5
+        else:
+            STATICREWARD = 3
+        new_block["uncleReward"] = len(new_block["uncleNum"]) * STATICREWARD / 32
+        new_block["reward"] = STATICREWARD
         # Filter and decode each transaction and add it back
         # 	Value, gas, and gasPrice are all converted to ether
 
