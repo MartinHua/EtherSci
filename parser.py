@@ -49,7 +49,8 @@ class Parser(object):
         host="http://128.83.144.143",
         delay=0.0001,
         startBlock = None,
-        endBlock = None
+        endBlock = None,
+        fileName = None
     ):
         """Initialize the Crawler."""
         logging.debug("Starting Crawler")
@@ -66,7 +67,7 @@ class Parser(object):
             self.block = {}
             # self.max_block_geth = self.highestBlockEth()
             # self.max_block_EtherDB = self.highestBlockDatabase()
-            self.run(startBlock, endBlock)
+            self.run(startBlock, endBlock, fileName)
 
     def _rpcRequest(self, method, params, key):
         """Make an RPC request to geth on port 8545."""
@@ -91,7 +92,7 @@ class Parser(object):
         for t in block["transactions"]:
             receipt = self._rpcRequest("eth_getTransactionReceipt", [t["txHash"]], "result")
             t["gasUsed"] = int(receipt["gasUsed"], 16)
-            t["contractAddress"] = receipt["contractAddress"]
+            # t["contractAddress"] = receipt["contractAddress"]
             t["txFee"] = t["gasUsed"] * t["gasPrice"]
             txFee += t["txFee"]
             # t["logs"] = receipt["logs"]
@@ -121,7 +122,7 @@ class Parser(object):
         else:
             self.saveBlock({"number": n, "transactions": []})
 
-    def run(self, startBlock, endBlock):
+    def run(self, startBlock, endBlock, fileName):
         """
         Run the process.
         Iterate through the blockchain on geth and fill up EtherDB with block data.
@@ -130,15 +131,23 @@ class Parser(object):
         print("Processing remainder of the blockchain...")
         for n in range(startBlock, endBlock):
             self.addBlock(n)
-        pickle.dump(self.block, open("save.p", "wb"))
+            if n % 100 == 0:
+                pickle.dump(self.block, open("/scratch/cluster/xh3426/etherData/" + fileName + ".p", "wb"))
+                print("Done:", n)
+                f = open('/scratch/cluster/xh3426/etherData/' + fileName + ".log", 'w')
+                f.write("Done:"+str(n))
+                f.close()
 
         print("Done!\n")
+        f = open('/scratch/cluster/xh3426/etherData/' + fileName + ".log", 'w')
+        f.write("Done:"+str(n))
+        f.close()
 
 
 if __name__ == "__main__":
-    parser = Parser(start=True, startBlock=0, endBlock=100)
-    # print(parser.getBlock(1000000))
-    # print(time.time())
-    # for n in range(5):
-    #     print(parser.getBlock(n+5000000))
-    # print(time.time())
+    # parser = Parser()
+    # print(parser.getBlock(5000000))
+    parser = Parser(start=True, startBlock=int(sys.argv[1]), endBlock=int(sys.argv[1])+1000, fileName=sys.argv[1])
+    # parser = Parser(start=True, startBlock=0, endBlock=100, fileName="100")
+    # d = pickle.load(open("/scratch/cluster/xh3426/etherData/100.p", "rb"))
+    # print(d)

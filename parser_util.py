@@ -5,7 +5,7 @@ import os
 
 DB_NAME = "blockchain"
 COLLECTION = "transactions"
-
+STATICREWARD = 0
 # Geth
 # ----
 def decodeBlock(block):
@@ -55,8 +55,6 @@ def decodeBlock(block):
     # return block
     try:
         b = block
-        if "result" in block:
-            b = block["result"]
         # Filter the block
         new_block = {
             "blockNum": int(b["number"], 16),
@@ -72,7 +70,7 @@ def decodeBlock(block):
             STATICREWARD = 5
         else:
             STATICREWARD = 3
-        new_block["uncleReward"] = len(new_block["uncleNum"]) * STATICREWARD / 32
+        new_block["uncleReward"] = new_block["uncleNum"] * STATICREWARD / 32
         new_block["reward"] = STATICREWARD
         # Filter and decode each transaction and add it back
         # 	Value, gas, and gasPrice are all converted to ether
@@ -86,10 +84,9 @@ def decodeBlock(block):
                 "value": float(int(t["value"], 16))/10**18,
                 "gasLimit": int(t["gas"], 16),
                 "gasPrice": int(t["gasPrice"], 16)/10**9,
-                "data": t["input"],
+                "data": len(t["input"])-2,
                 "blockNum": int(t["blockNumber"], 16)
             }
-
             new_block["transactions"].append(new_t)
 
         return new_block
