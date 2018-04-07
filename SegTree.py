@@ -34,7 +34,7 @@ class blkSegTree(object):
             if start + 1 == end:
                 return blkNode(start, end, blks[start])
             root = blkNode(start, end, blks[0]) #####????????????
-            mid = start + (end - start) / 2
+            mid = int(start + (end - start) / 2)
             root.left = buildTree(start, mid, blks)
             root.right = buildTree(mid, end, blks)
             root.txFee = root.left.txFee + root.right.txFee
@@ -53,11 +53,17 @@ class blkSegTree(object):
                 return 0
             if i == node.start and j == node.end:
                 return node.txFee
-            mid = node.start + (node.end - node.start) / 2
+            mid = int(node.start + (node.end - node.start) / 2)
             return rangeHelper(i, min(j, mid), node.left) + rangeHelper(max(i, mid), j, node.right)
 
         return rangeHelper(i, j + 1, self.root)
 
+    def inorder(self, root):
+        if root == None:
+            return
+        self.inorder(root.left)
+        print (root.start, root.end, root.txFee)
+        self.inorder(root.right)
     def query_txFee_Max(self, i, j):
 
         def rangeHelper(i, j, node):
@@ -66,19 +72,20 @@ class blkSegTree(object):
                 return 0
             if i == node.start and j == node.end:
                 return node.txFee
-            mid = node.start + (node.end - node.start) / 2
+            mid = int(node.start + (node.end - node.start) / 2)
             return max(rangeHelper(i, min(j, mid), node.left),rangeHelper(max(i, mid), j, node.right))
 
         return rangeHelper(i, j + 1, self.root)
 
 
 bs= []
-for i in range(10):
+for i in range(3):
     b = dict()
-    b["timestamp"] = i
+    b["timestamp"] = 10-i
     b["txFee"] = i*10
     bs.append(b)
 s= blkSegTree(bs)
 
-print s.query_txFee_Sum(0, 3)
-print s.query_txFee_Max(0, 3)
+s.inorder(s.root)
+print (s.query_txFee_Sum(5, 7))
+print (s.query_txFee_Max(5, 7))
