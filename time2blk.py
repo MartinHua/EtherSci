@@ -85,18 +85,17 @@ print ( mapping.getBlk(t))
 #print (time.ctime(t))
 
 
-'''
->>> time.ctime(data[5000900]['timestamp'])
-'Tue Jan 30 11:30:24 2018'
->>> time.ctime(data[5000000]['timestamp'])
-'Tue Jan 30 07:41:33 2018'
 
-'''
-'''
->>> data[5000900]['timestamp']
-1517333424
->>> data[5000000]['timestamp']
-1517319693
-'''
+#>>> time.ctime(data[5000900]['timestamp'])
+#'Tue Jan 30 11:30:24 2018'
+#>>> time.ctime(data[5000000]['timestamp'])
+#'Tue Jan 30 07:41:33 2018'
+
+
+#data[5000900]['timestamp']
+#1517333424
+#data[5000000]['timestamp']
+#1517319693
+
 
 
