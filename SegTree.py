@@ -1,3 +1,4 @@
+# no tree!!!!!!!!!!!!!!!!!
 class blkNode: # store block info
     def __init__(self, start, end, blk):
         #self.blockNum = blk["blockNum"]
@@ -79,13 +80,13 @@ class blkSegTree(object):
 
 
 bs= []
-for i in range(3):
+for i in range(5):
     b = dict()
-    b["timestamp"] = 10-i
+    #b["timestamp"] = 10-i
     b["txFee"] = i*10
     bs.append(b)
 s= blkSegTree(bs)
 
 s.inorder(s.root)
-print (s.query_txFee_Sum(5, 7))
-print (s.query_txFee_Max(5, 7))
+print (s.query_txFee_Sum(0, 3))
+print (s.query_txFee_Max(0, 2))
