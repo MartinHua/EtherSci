@@ -1,7 +1,4 @@
 
-import matplotlib.pyplot as plt
-import numpy as np
-import seaborn as sns
 
 class blkNode: # store block info
     def __init__(self, start, end, blk):
@@ -81,51 +78,7 @@ class blkSegTree(object):
             return max(rangeHelper(i, min(j, mid), node.left),rangeHelper(max(i, mid), j, node.right))
 
         return rangeHelper(i, j + 1, self.root)
-import pickle
-filename = '5000000.p'
-with open('/u/cchsu/Downloads/' + filename, 'rb') as f:
-    data = pickle.load(f)
 
-s= blkSegTree(data, 5000000)
-
-#s.inorder(s.root)
-case1 = 0
-case2 = 1
-
-if case1:
-    sum = [0]*900
-    count = 0
-    for i in range( 900):
-        sum[i] = (s.query_txFee_Sum(5000000, 5000000+i))
-        count += data[5000000+i]['txFee']
-        print (sum[i], count)
-    #print (s.query_txFee_Max(0, 2))
-
-
-
-
-
-    sns.set_style("darkgrid")
-    plt.plot(sum)
-    plt.show()
-if case2:
-    from time2blk import time2blk
-
-    mapping = time2blk()
-    mapping.setBegin(5000000)
-    mapping.buildMap(5000000, '5000000.p')
-    test = [0]*30
-    pre_b = 0
-    for i in range(30):
-        t = "30/01/2018 08:" + str(i*2)
-        blk = mapping.getBlk(t)
-        print (blk)
-        print (pre_b, blk)
-        test[i] = s.query_txFee_Sum(5000000+ pre_b, 5000000 + blk)
-        pre_b = blk
-    sns.set_style("darkgrid")
-    plt.plot(test[1:30])
-    plt.show()
 
 '''
 bs= []

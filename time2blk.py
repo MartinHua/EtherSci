@@ -12,7 +12,7 @@ class time2blk: # store block info
         self.begin = offset
 
     def buildMap(self, offset, filename):
-        with open('/u/cchsu/Downloads/' + filename, 'rb') as f:
+        with open('/u/cchsu/Downloads/EtherData-master/' + filename, 'rb') as f:
             data = pickle.load(f)
         s = len(data)
 
@@ -66,6 +66,7 @@ class time2blk: # store block info
         else:
             # Element is not present in the array, choose l value
             return l
+'''
 t = "30/01/2018 08:00"
 #getBlk(t, map)
 
@@ -78,7 +79,7 @@ mapping.setBegin(5000000)
 mapping.buildMap(5000000, '5000000.p')
 
 print ( mapping.getBlk(t))
-
+'''
 #print (data[5000000])
 #t= data[5000000]["timestamp"]
 #print (t)
