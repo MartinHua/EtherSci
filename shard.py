@@ -9,10 +9,18 @@ from ctypes import c_int, addressof
 import pickle
 import sys
 import os
+import pickle
+import time
+import datetime
 
+import matplotlib.pyplot as plt
+import numpy as np
+import seaborn as sns
+from time2blk import time2blk
+from SegTree import *
 
 slavePort = randint(30000, 40000)
-slaveAddress = ('idomeneo',slavePort)#('fidelio',slavePort)
+slaveAddress = ('fidelio',slavePort) #('idomeneo',slavePort)#
 masterPort = randint(26002, 29999)
 masterAddr = (socket.gethostname(), masterPort)
 listenAddr = (socket.gethostname(), masterPort-1)
@@ -46,6 +54,22 @@ time.sleep(0.5)
 #prepare the listening channel for slaves
 threading.Thread(target=on_new_answer, args=(listenAddr,)).start()
 time.sleep(0.2)
+
+
+#
+
+data = dict()
+mapping = time2blk()
+mapping.setBegin(4000000)
+for i in range(50):
+    num = 4000000 + i*1000
+    filename = str(num) +'.p'
+    with open('/u/fuli2015/Downloads/EtherData-master/' + filename, 'rb') as f:
+        temp = pickle.load(f)
+        data.update(temp)
+        mapping.buildMap(num, filename)
+s = blkSegTree(data, 4000000, p, id, partition) # Partition: number of slaves, ID = slave ID
+
 
 
 #query slaves from the start time to the end time

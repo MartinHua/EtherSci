@@ -45,12 +45,12 @@ class blkNode: # store block info
 
 class blkSegTree(object):
 
-    def __init__(self, blks, offset, precision):
+    def __init__(self, blks, offset, precision, id, partition):
         self.offset = offset
         def buildTree(start, end, blks):
             if start >= end:
                 return None
-            if start + 1 == end:
+            if start + partition == end:
                 return blkNode(start, end, blks[start], precision)
             root = blkNode(start, end, blks[self.offset], precision)
             mid = int(start + (end - start) / 2)
@@ -61,7 +61,7 @@ class blkSegTree(object):
             root.range = root.left.rangeTx + root.right.rangeTx
             return root
 
-        self.root = buildTree(offset, offset+len(blks), blks)
+        self.root = buildTree(offset+id, offset+len(blks), blks)
 
 
 
