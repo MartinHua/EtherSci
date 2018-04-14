@@ -10,6 +10,7 @@ import seaborn as sns
 from time2blk import time2blk
 from SegTree import *
 
+# test sum. input is time
 t0 = time.time()
 data = dict()
 mapping = time2blk()
@@ -25,8 +26,11 @@ s = blkSegTree(data, 4000000)
 
 t1 = time.time()
 
-print ('p[here]', time.ctime(data[4000000]['timestamp']))
-print ('p[here]', time.ctime(data[4019999]['timestamp']))
+# print ('p[here]', time.ctime(data[4000000]['timestamp']))
+# #print ('p[here]', time.ctime(data[4019999]['timestamp']))
+# a = 3
+# b= 3
+# print (s.query_txFee_biggerThen1(4000000+ a, 4000000 + b))
 test = [0]*24
 pre_b = 0
 t2=time.time()
@@ -41,18 +45,44 @@ t3=time.time()
 print ("[time]" , (t1-t0) , (t3-t2)/24)
 sns.set_style("darkgrid")
 plt.plot(test[1:24])
+plt.xlabel('Hours')
+plt.ylabel('Transaction Fees')
+plt.title('Transaction Fees (per block) per hour')
 plt.show()
 
+testS = [0]*24
+testL = [0]*24
+testT = [0]*24
 for i in range(24):
-    t = "11/07/2017 " + str(i) + ":00"
+    t = "12/07/2017 " + str(i) + ":00"
     blk = mapping.getBlk(t)
-    print (blk)
-    print (pre_b, blk)
-    test[i] = s.query_txFee_Sum(4000000+ pre_b, 4000000 + blk)
+    #print (blk)
+    #print (pre_b, blk)
+    testL[i] = s.query_txFee_biggerThen1(4000000+ pre_b, 4000000 + blk)
+    testS[i] = s.query_txFee_smallerThen1(4000000 + pre_b, 4000000 + blk)
+    testT[i] = s.query_txFee_Num(4000000 + pre_b, 4000000 + blk)
     pre_b = blk
+t3=time.time()
+print ("[time]" , (t1-t0) , (t3-t2)/24)
 sns.set_style("darkgrid")
-plt.plot(test[1:24])
+plt.plot( testS[1:24])
+plt.plot( testL[1:24])
+plt.plot( testT[1:24])
+plt.legend(['smaller than 0.001ETH', 'bigger than 0.001ETH', 'total'])
+plt.xlabel('Hours')
+plt.ylabel('Numbers of Transaction')
+plt.title('Transaction Fees (per block) per hour')
 plt.show()
+# for i in range(24):
+#     t = "11/07/2017 " + str(i) + ":00"
+#     blk = mapping.getBlk(t)
+#     print (blk)
+#     print (pre_b, blk)
+#     test[i] = s.query_txFee_Sum(4000000+ pre_b, 4000000 + blk)
+#     pre_b = blk
+# sns.set_style("darkgrid")
+# plt.plot(test[1:24])
+# plt.show()
 
 
 case0 = 0
