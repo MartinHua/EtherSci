@@ -1,7 +1,7 @@
 
 
 class blkNode: # store block info
-    def __init__(self, start, end, blk):
+    def __init__(self, start, end, blk, precision):
         #self.blockNum = blk["blockNum"]
         #self.miner = blk["miner"]
         #self.timestamp = blk["timestamp"]
@@ -15,28 +15,21 @@ class blkNode: # store block info
         self.left = None
         self.right = None
 
-        def countFeeBigger(th, blk):
+
+        def countRange(low, up, blk):
             count = 0
             if blk == None:
                 return 0
             #print (blk)
             for tx in blk['transactions']:
-                if tx['txFee'] >= th*10**9:
+                if tx['txFee'] < up*10**9 and tx['txFee'] >= low*10**9 :
                     count +=1
             return count
-        def countFeeSmaller(th, blk):
-            count = 0
-            if blk == None:
-                return 0
-            #print (blk)
-            for tx in blk['transactions']:
-                if tx['txFee'] < th*10**9:
-                    count +=1
-            return count
+        n = int(10 / precision)
+        self.rangeTx = [0]*n
+        for i in range(n):
+            self.rangeTx[i] = countRange(0.0001*i*precision, 0.0001*(i+1)*precision, blk)
 
-
-        self.biggerThen1 = countFeeBigger(0.001, blk)
-        self.smallerThen1 = countFeeSmaller(0.001, blk)
         self.numTx = len(blk['transactions'])
         '''
         self.blockNum = tx["blockNum"]
@@ -52,21 +45,20 @@ class blkNode: # store block info
 
 class blkSegTree(object):
 
-    def __init__(self, blks, offset):
+    def __init__(self, blks, offset, precision):
         self.offset = offset
         def buildTree(start, end, blks):
             if start >= end:
                 return None
             if start + 1 == end:
-                return blkNode(start, end, blks[start])
-            root = blkNode(start, end, blks[self.offset]) #####????????????
+                return blkNode(start, end, blks[start], precision)
+            root = blkNode(start, end, blks[self.offset], precision)
             mid = int(start + (end - start) / 2)
             root.left = buildTree(start, mid, blks)
             root.right = buildTree(mid, end, blks)
             root.txFee = root.left.txFee + root.right.txFee
-            root.biggerThen1 = root.left.biggerThen1 + root.right.biggerThen1
-            root.smallerThen1 = root.left.smallerThen1 + root.right.smallerThen1
             root.numTx = root.left.numTx + root.right.numTx
+            root.range = root.left.rangeTx + root.right.rangeTx
             return root
 
         self.root = buildTree(offset, offset+len(blks), blks)
@@ -105,30 +97,7 @@ class blkSegTree(object):
 
         return rangeHelper(i, j + 1, self.root)
 
-    def query_txFee_biggerThen1(self, i, j):
 
-        def rangeHelper(i, j, node):
-            # return covered sum
-            if node == None or i >= node.end or j <= node.start:
-                return 0
-            if i == node.start and j == node.end:
-                return node.biggerThen1
-            mid = int(node.start + (node.end - node.start) / 2)
-            return rangeHelper(i, min(j, mid), node.left) + rangeHelper(max(i, mid), j, node.right)
-
-        return rangeHelper(i, j + 1, self.root)
-    def query_txFee_smallerThen1(self, i, j):
-
-        def rangeHelper(i, j, node):
-            # return covered sum
-            if node == None or i >= node.end or j <= node.start:
-                return 0
-            if i == node.start and j == node.end:
-                return node.smallerThen1
-            mid = int(node.start + (node.end - node.start) / 2)
-            return rangeHelper(i, min(j, mid), node.left) + rangeHelper(max(i, mid), j, node.right)
-
-        return rangeHelper(i, j + 1, self.root)
     def query_txFee_Num(self, i, j):
 
         def rangeHelper(i, j, node):
@@ -137,6 +106,21 @@ class blkSegTree(object):
                 return 0
             if i == node.start and j == node.end:
                 return node.numTx
+            mid = int(node.start + (node.end - node.start) / 2)
+            return rangeHelper(i, min(j, mid), node.left) + rangeHelper(max(i, mid), j, node.right)
+
+        return rangeHelper(i, j + 1, self.root)
+    def query_txFee_range(self, i, j, low, up):
+
+        def rangeHelper(i, j, node):
+            # return covered sum
+            if node == None or i >= node.end or j <= node.start:
+                return 0
+            if i == node.start and j == node.end:
+                count = 0
+                for i in range(low, up):
+                    count += node.rangeTx[i]
+                return count
             mid = int(node.start + (node.end - node.start) / 2)
             return rangeHelper(i, min(j, mid), node.left) + rangeHelper(max(i, mid), j, node.right)
 
@@ -163,7 +147,7 @@ for i in range(5):
     #b["timestamp"] = 10-i
     b["txFee"] = i*10
     bs.append(b)
-s= blkSegTree(bs)
+s= blkSegTree(bs, 0)
 
 s.inorder(s.root)
 print (s.query_txFee_Sum(0, 3))

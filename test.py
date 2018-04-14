@@ -9,7 +9,7 @@ import numpy as np
 import seaborn as sns
 from time2blk import time2blk
 from SegTree import *
-
+p = 5
 # test sum. input is time
 t0 = time.time()
 data = dict()
@@ -18,19 +18,17 @@ mapping.setBegin(4000000)
 for i in range(50):
     num = 4000000 + i*1000
     filename = str(num) +'.p'
-    with open('/u/cchsu/Downloads/EtherData-master/' + filename, 'rb') as f:
+    with open('/u/fuli2015/Downloads/EtherData-master/' + filename, 'rb') as f:
         temp = pickle.load(f)
         data.update(temp)
         mapping.buildMap(num, filename)
-s = blkSegTree(data, 4000000)
+s = blkSegTree(data, 4000000, p)
 
 t1 = time.time()
 
-# print ('p[here]', time.ctime(data[4000000]['timestamp']))
-# #print ('p[here]', time.ctime(data[4019999]['timestamp']))
-# a = 3
-# b= 3
-# print (s.query_txFee_biggerThen1(4000000+ a, 4000000 + b))
+print ('p[here]', time.ctime(data[4000000]['timestamp']), data[4000000]['timestamp'])
+print ('p[here]', time.ctime(data[4049999]['timestamp']),data[4049999]['timestamp'])
+
 test = [0]*24
 pre_b = 0
 t2=time.time()
@@ -50,29 +48,86 @@ plt.ylabel('Transaction Fees')
 plt.title('Transaction Fees (per block) per hour')
 plt.show()
 
-testS = [0]*24
-testL = [0]*24
-testT = [0]*24
+
+
+# testS = [0]*24
+# testL = [0]*24
+# testT = [0]*24
+# for i in range(24):
+#     t = "12/07/2017 " + str(i) + ":00"
+#     blk = mapping.getBlk(t)
+#     #print (blk)
+#     #print (pre_b, blk)
+#     testT[i] = s.query_txFee_range(4000000+ pre_b, 4000000 + blk, 0, 6)
+#     testS[i] = s.query_txFee_range(4000000 + pre_b, 4000000 + blk, 0, 3)
+#     testL[i] = s.query_txFee_range(4000000 + pre_b, 4000000 + blk, 3, 6)
+#     pre_b = blk
+# t3=time.time()
+# print ("[time]" , (t1-t0) , (t3-t2)/24)
+# sns.set_style("darkgrid")
+# plt.plot( testT[1:24])
+# plt.plot( testS[1:24])
+# plt.plot( testL[1:24])
+# plt.legend(['[0.0001-0.0006]ETH', '[0.0001-0.0003]ETH', '[0.0003-0.0006]ETH'])
+# plt.xlabel('Hours')
+# plt.ylabel('Numbers of Transaction')
+# plt.title('Transaction Fees (per block) per hour (Range Query)')
+# plt.show()
+
+# #### test for precision 1
+# test = [[0]*24 for _ in range(9)]
+#
+# for i in range(24):
+#     t = "12/07/2017 " + str(i) + ":00"
+#     blk = mapping.getBlk(t)
+#     #print (blk)
+#     #print (pre_b, blk)
+#     for j in range(9):
+#         test[j][i] = s.query_txFee_range(4000000+ pre_b, 4000000 + blk, j, j+1)
+#     pre_b = blk
+# t3=time.time()
+# print ("[time]" , (t1-t0) , (t3-t2)/24)
+# sns.set_style("darkgrid")
+# for j in range(9):
+#     plt.plot( test[j][1:24])
+#
+# plt.legend(['0-1', '1-2', '2-3', '3-4', '4-5', '5-6', '6-7', '7-8', '8-9', '9-10'])
+# plt.xlabel('Hours')
+# plt.ylabel('Numbers of Transaction')
+# plt.title('Transaction Fees (per block) per hour (Range Query)')
+# plt.show()
+#
+# print ('Total num of Txansactions'+ str(s.query_txFee_Num(4000000, 4049999)))
+
+
+#### test for precision 5
+
+num = int(10/p)
+test = [[0]*24 for _ in range(num)]
+
 for i in range(24):
     t = "12/07/2017 " + str(i) + ":00"
     blk = mapping.getBlk(t)
     #print (blk)
     #print (pre_b, blk)
-    testL[i] = s.query_txFee_biggerThen1(4000000+ pre_b, 4000000 + blk)
-    testS[i] = s.query_txFee_smallerThen1(4000000 + pre_b, 4000000 + blk)
-    testT[i] = s.query_txFee_Num(4000000 + pre_b, 4000000 + blk)
+    for j in range(num):
+        print(j)
+        test[j][i] = s.query_txFee_range(4000000+ pre_b, 4000000 + blk, j, j+1)
     pre_b = blk
 t3=time.time()
 print ("[time]" , (t1-t0) , (t3-t2)/24)
 sns.set_style("darkgrid")
-plt.plot( testS[1:24])
-plt.plot( testL[1:24])
-plt.plot( testT[1:24])
-plt.legend(['smaller than 0.001ETH', 'bigger than 0.001ETH', 'total'])
+for j in range(num):
+    plt.plot( test[j][1:24])
+
+plt.legend(['0-5', '5-10'])
 plt.xlabel('Hours')
 plt.ylabel('Numbers of Transaction')
-plt.title('Transaction Fees (per block) per hour')
+plt.title('Transaction Fees (per block) per hour (Range Query)')
 plt.show()
+
+print ('Total num of Txansactions'+ str(s.query_txFee_Num(4000000, 4049999)))
+
 # for i in range(24):
 #     t = "11/07/2017 " + str(i) + ":00"
 #     blk = mapping.getBlk(t)
