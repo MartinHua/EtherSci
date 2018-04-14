@@ -24,7 +24,7 @@ def sendAll(socket, data, length):
         cnt += length
     socket.sendall(data[(cnt - length): len(data)])
 
-class client(threading.Thread):
+class master(threading.Thread):
 
     def __init__(self, cid, cport, sport):
         threading.Thread.__init__(self)
