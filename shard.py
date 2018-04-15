@@ -51,4 +51,30 @@ time.sleep(0.2)
 #query slaves from the start time to the end time
 query(1,2)
 
+###############
+# build tree
+###############
+data = dict()
+mapping = time2blk()
+mapping.setBegin(4000000)
+for i in range(50):
+    num = 4000000 + i*1000
+    filename = str(num) +'.p'
+    with open('/u/fuli2015/Downloads/EtherData-master/' + filename, 'rb') as f:
+        temp = pickle.load(f)
+        data.update(temp)
+        mapping.buildMap(num, filename)
 
+s0= blkSegTree(data, 4000000, 1, 0, 2)
+
+s1= blkSegTree(data, 4000000, 1, 1, 2)
+
+###################
+#
+################
+def query(type, start, end):
+    low = start/partition
+    high = end/partition
+    if type == 'query_txFee_range':
+        s0.query_txFee_range(low , high + blk, 2, 5) # range from 0.0002-0.0005
+        s1.query_txFee_range(low + high, 4000000 + blk, 2, 5)
