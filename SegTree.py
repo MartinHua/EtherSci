@@ -133,25 +133,25 @@ class blkSegTree(object):
             return rangeHelper(i, min(j, mid), node.left) + rangeHelper(max(i, mid), j, node.right)
 
         return rangeHelper(i, j + 1, self.root)
-
-#l = [ 8, 0, 5, 4, 3, 12, 18, 2, 1]
-l = [0,1,2,3,4,5,6,7]
-bs= []
-for i in range(8):
-    b = dict()
-    #b["timestamp"] = 10-i
-    b["txFee"] = l[i]
-    t = dict()
-    t["txFee"] = 0.0005
-    b["transactions"] = [t]
-
-    bs.append(b)
-s1= blkSegTree(bs, 0, 1, 0, 2)
-
-s2= blkSegTree(bs, 0, 1, 1, 2)
-s1.inorder(s1.root)
-print('-----')
-s2.inorder(s2.root)
+#
+# #l = [ 8, 0, 5, 4, 3, 12, 18, 2, 1]
+# l = [0,1,2,3,4,5,6,7]
+# bs= []
+# for i in range(8):
+#     b = dict()
+#     #b["timestamp"] = 10-i
+#     b["txFee"] = l[i]
+#     t = dict()
+#     t["txFee"] = 0.0005
+#     b["transactions"] = [t]
+#
+#     bs.append(b)
+# s1= blkSegTree(bs, 0, 1, 0, 2)
+#
+# s2= blkSegTree(bs, 0, 1, 1, 2)
+# s1.inorder(s1.root)
+# print('-----')
+# s2.inorder(s2.root)
 # print (s.query_txFee_Sum(0, 8))
 # print (s.query_txFee_Max(0, 2))
 # print (s.query_txFee_biggerThen1(0, 8)

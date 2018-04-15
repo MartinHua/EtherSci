@@ -9,20 +9,23 @@ import numpy as np
 import seaborn as sns
 from time2blk import time2blk
 from SegTree import *
+import os
 p = 5
 # test sum. input is time
 t0 = time.time()
 data = dict()
 mapping = time2blk()
 mapping.setBegin(4000000)
+script_dir = os.path.dirname(os.path.dirname(__file__))+'/EtherData-master/'
+print(script_dir)
 for i in range(50):
     num = 4000000 + i*1000
     filename = str(num) +'.p'
-    with open('/u/fuli2015/Downloads/EtherData-master/' + filename, 'rb') as f:
+    with open(script_dir+filename, 'rb') as f:
         temp = pickle.load(f)
         data.update(temp)
         mapping.buildMap(num, filename)
-s = blkSegTree(data, 4000000, p)
+s = blkSegTree(data, 4000000, p,0,1)
 
 t1 = time.time()
 
