@@ -45,35 +45,35 @@ def query(start,end):
     message = pickle.dumps(("query", start, end))
     s.sendall(message)
 
-
-#start a new slave
-slave = slave(0, slavePort)
-slave.start()
-time.sleep(0.5)
-
-#prepare the listening channel for slaves
-threading.Thread(target=on_new_answer, args=(listenAddr,)).start()
-time.sleep(0.2)
-
-
 #
-
-data = dict()
-mapping = time2blk()
-mapping.setBegin(4000000)
-for i in range(50):
-    num = 4000000 + i*1000
-    filename = str(num) +'.p'
-    with open('/u/fuli2015/Downloads/EtherData-master/' + filename, 'rb') as f:
-        temp = pickle.load(f)
-        data.update(temp)
-        mapping.buildMap(num, filename)
-s = blkSegTree(data, 4000000, p, id, partition) # Partition: number of slaves, ID = slave ID
-
-
-
-#query slaves from the start time to the end time
-query(1,2)
+# #start a new slave
+# slave = slave(0, slavePort)
+# slave.start()
+# time.sleep(0.5)
+#
+# #prepare the listening channel for slaves
+# threading.Thread(target=on_new_answer, args=(listenAddr,)).start()
+# time.sleep(0.2)
+#
+#
+# #
+#
+# data = dict()
+# mapping = time2blk()
+# mapping.setBegin(4000000)
+# for i in range(50):
+#     num = 4000000 + i*1000
+#     filename = str(num) +'.p'
+#     with open('/u/cchsu/Downloads/EtherData-master/' + filename, 'rb') as f:
+#         temp = pickle.load(f)
+#         data.update(temp)
+#         mapping.buildMap(num, filename)
+# s = blkSegTree(data, 4000000, p, id, partition) # Partition: number of slaves, ID = slave ID
+#
+#
+#
+# #query slaves from the start time to the end time
+# query(1,2)
 
 ###############
 # build tree
@@ -81,24 +81,37 @@ query(1,2)
 data = dict()
 mapping = time2blk()
 mapping.setBegin(4000000)
-for i in range(50):
+for i in range(1):
     num = 4000000 + i*1000
     filename = str(num) +'.p'
-    with open('/u/fuli2015/Downloads/EtherData-master/' + filename, 'rb') as f:
+    with open('/u/cchsu/Downloads/EtherData-master/' + filename, 'rb') as f:
         temp = pickle.load(f)
         data.update(temp)
         mapping.buildMap(num, filename)
 
+# 2 partition
 s0= blkSegTree(data, 4000000, 1, 0, 2)
-
 s1= blkSegTree(data, 4000000, 1, 1, 2)
+
+# 1 partition
+#s0 = blkSegTree(data, 4000000, 1, 0, 1)
+
 
 ###################
 #
 ################
 def query(type, start, end):
-    low = start/partition
-    high = end/partition
+    partition = 2
+    low = start
+    high = start + int((end - start)/partition)
+    print (low, high)
     if type == 'query_txFee_range':
-        s0.query_txFee_range(low , high + blk, 2, 5) # range from 0.0002-0.0005
-        s1.query_txFee_range(low + high, 4000000 + blk, 2, 5)
+        ans = 0
+        #ans += s0.query_txFee_Num(low,high)
+        #ans += s1.query_txFee_Num(low, high)
+        ans += s0.query_txFee_range(low, high, 1, 9)
+        ans += s1.query_txFee_range(low, high, 1, 9)
+        #s1.inorder(s1.root)
+        print (ans)
+
+query('query_txFee_range', 4000000, 4000999)
