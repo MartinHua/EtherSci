@@ -1,6 +1,8 @@
 import pickle
 import time
 import datetime
+import os
+script_dir = os.path.dirname(os.path.dirname(__file__))+'/EtherData-master/'
 
 # this class helps to build a array where idx represent timestamp and value is the block number. idx = real_ - begin_ts
 class time2blk: # store block info
@@ -12,7 +14,7 @@ class time2blk: # store block info
         self.begin = offset
 
     def buildMap(self, offset, filename):
-        with open('/u/cchsu/Downloads/EtherData-master/' + filename, 'rb') as f:
+        with open(script_dir + filename, 'rb') as f:
             data = pickle.load(f)
         s = len(data)
 

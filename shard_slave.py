@@ -65,11 +65,11 @@ class slave(threading.Thread):
         self.s.listen(5)  # Now wait for client connection.
         while True:
             command, addr = self.s.accept()  # Establish connection with client.
-            threading.Thread(target=self.on_new_command, args=(command, addr)).start()
+            threading.Thread(target=self.on_new_command, args=(command,)).start()
 
 
 
-    def on_new_command(self, command, addr):
+    def on_new_command(self, command,):
         while True:
             msg = recvAll(command, msgLength)
             if (msg != b''):
@@ -79,7 +79,7 @@ class slave(threading.Thread):
                         entry = pickle.load(file)
                         if entry[0] == "query":
                             answer = self.query(entry[1],entry[2])
-                            self.sendBack(answer,addr)
+                            self.sendBack(answer,entry[3])
                     except EOFError:
                         break
 
@@ -88,9 +88,9 @@ class slave(threading.Thread):
         s = socket.socket()
         s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         s.bind((self.host, sendFromPorts[self.sid]))
-        s.connect((toAddr[0],toAddr[1]-1))
+        s.connect(toAddr)
         sendAll(s, pickle.dumps(("answer", answer)), msgLength)
         return 0
 
-    def query(self,start,end,rangeStart=2,rangeEnd=5):
+    def query(self,start,end,rangeStart=0,rangeEnd=5):
         return self.tree.query_txFee_range(start, end , rangeStart, rangeEnd)
