@@ -22,7 +22,7 @@ class blkNode: # store block info
             #print (blk)
             for tx in blk['transactions']:
                 if tx['txFee'] < up*10**9 and tx['txFee'] >= low*10**9 :
-                    count +=1
+                    count += 1
             return count
         self.txFee = 0
         n = int(10 / precision)
@@ -53,7 +53,8 @@ class blkSegTree(object):
         self.partition = partition
         self.precicion = precision
         def getNode(start, end, blks, precision):
-            index = self.id + self.partition*start
+            index = self.id + self.offset + self.partition*(start - self.offset)
+            #print ('[debug] index: ', index)
             return blkNode(start, end,  precision, blks[index])
         def buildTree(start, end, blks, precision ):
             if start >= end:
@@ -66,9 +67,10 @@ class blkSegTree(object):
             root.right = buildTree(mid, end, blks, precision)
             root.txFee = root.left.txFee + root.right.txFee
             root.numTx = root.left.numTx + root.right.numTx
-            root.range = root.left.rangeTx + root.right.rangeTx
+            root.rangeTx = [x + y for x, y in zip(root.left.rangeTx, root.right.rangeTx)]
+            #root.rangeTx = root.left.rangeTx + root.right.rangeTx
             return root
-
+        #print('start: ', offset, ' end:', offset+ int(len(blks)/partition) )
         self.root = buildTree(offset, offset+ int(len(blks)/partition), blks, precision)
 
 
@@ -90,7 +92,7 @@ class blkSegTree(object):
         if root == None:
             return
         self.inorder(root.left)
-        print (root.start, root.end, root.txFee)
+        print (root.start, root.end, root.rangeTx)
         self.inorder(root.right)
     def query_txFee_Max(self, i, j):
 
@@ -126,10 +128,12 @@ class blkSegTree(object):
                 return 0
             if i == node.start and j == node.end:
                 count = 0
-                for i in range(low, up):
-                    count += node.rangeTx[i]
+                for x in range(low, up):
+                    count += node.rangeTx[x]
+                print ('[debug] ', node.start, node.end, node.rangeTx)
                 return count
             mid = int(node.start + (node.end - node.start) / 2)
+            print('[debug] mid', mid)
             return rangeHelper(i, min(j, mid), node.left) + rangeHelper(max(i, mid), j, node.right)
 
         return rangeHelper(i, j + 1, self.root)

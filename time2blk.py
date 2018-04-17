@@ -12,7 +12,7 @@ class time2blk: # store block info
         self.begin = offset
 
     def buildMap(self, offset, filename):
-        with open('/u/fuli2015/Downloads/EtherData-master/' + filename, 'rb') as f:
+        with open('/u/cchsu/Downloads/EtherData-master/' + filename, 'rb') as f:
             data = pickle.load(f)
         s = len(data)
 
