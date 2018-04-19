@@ -81,9 +81,10 @@ def query(start,end):
 data = dict()
 mapping = time2blk()
 mapping.setBegin(4000000)
-for i in range(1):
+for i in range(50):
     num = 4000000 + i*1000
     filename = str(num) +'.p'
+    #with open('/u/cchsu/Downloads/EtherData-master/' + filename, 'rb') as f:
     with open('/u/cchsu/Downloads/EtherData-master/' + filename, 'rb') as f:
         temp = pickle.load(f)
         data.update(temp)
