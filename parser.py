@@ -9,16 +9,7 @@ import os
 import pickle
 import logging
 import time
-# import tqdm
-# sys.path.append(os.path.realpath(os.path.dirname(__file__)))
-#
-# DIR = os.environ['BLOCKCHAIN_MONGO_DATA_DIR']
-# LOGFIL = "parser.log"
-# if "BLOCKCHAIN_ANALYSIS_LOGS" in os.environ:
-#     LOGFIL = "{}/{}".format(os.environ['BLOCKCHAIN_ANALYSIS_LOGS'], LOGFIL)
-# parser_util.refresh_logger(LOGFIL)
-# logging.basicConfig(filename=LOGFIL, level=logging.DEBUG)
-# logging.getLogger("urllib3").setLevel(logging.WARNING)
+
 
 
 class Parser(object):
@@ -92,10 +83,8 @@ class Parser(object):
         for t in block["transactions"]:
             receipt = self._rpcRequest("eth_getTransactionReceipt", [t["txHash"]], "result")
             t["gasUsed"] = int(receipt["gasUsed"], 16)
-            # t["contractAddress"] = receipt["contractAddress"]
             t["txFee"] = t["gasUsed"] * t["gasPrice"]
             txFee += t["txFee"]
-            # t["logs"] = receipt["logs"]
         block["txFee"] = txFee
         return block
 
@@ -109,9 +98,6 @@ class Parser(object):
         self.block[block["blockNum"]] = block
         return
 
-    def highestBlockDatabase(self):
-        """Find the highest numbered block in the database."""
-        return 0
 
     def addBlock(self, n):
         """Add a block to database."""
@@ -145,15 +131,12 @@ class Parser(object):
                 f.close()
 
         print("Done!\n")
-        f = open('/scratch/cluster/xh3426/etherData/' + fileName + ".log", 'w')
-        f.write("Done:"+str(n))
-        f.close()
-
 
 if __name__ == "__main__":
-    # parser = Parser()
+    parser = Parser()
     # print(parser.getBlock(5000000))
-    parser = Parser(start=True, startBlock=int(sys.argv[1]), endBlock=int(sys.argv[1])+1000, fileName=int(sys.argv[1]))
+    # parser = Parser(start=True, startBlock=int(sys.argv[1]), endBlock=int(sys.argv[1])+10000, fileName=int(sys.argv[1]))
     # parser = Parser(start=True, startBlock=0, endBlock=100, fileName="100")
     # d = pickle.load(open("/scratch/cluster/xh3426/etherData/100.p", "rb"))
     # print(d)
+    print(parser.highestBlockEth())
