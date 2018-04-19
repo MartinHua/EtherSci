@@ -54,10 +54,8 @@ class Parser(object):
         # The delay between requests to geth
         self.delay = delay
 
+        self.block = {}
         if start:
-            self.block = {}
-            # self.max_block_geth = self.highestBlockEth()
-            # self.max_block_EtherDB = self.highestBlockDatabase()
             self.run(startBlock, endBlock, fileName)
 
     def _rpcRequest(self, method, params, key):
@@ -98,7 +96,6 @@ class Parser(object):
         self.block[block["blockNum"]] = block
         return
 
-
     def addBlock(self, n):
         """Add a block to database."""
         b = self.getBlock(n)
@@ -111,9 +108,8 @@ class Parser(object):
     def run(self, startBlock, endBlock, fileName):
         """
         Run the process.
-        Iterate through the blockchain on geth and fill up EtherDB with block data.
+        Iterate through the blockchain on geth and save it to disk
         """
-
         fileName -= 1000
 
         print("Processing remainder of the blockchain...")
@@ -139,4 +135,6 @@ if __name__ == "__main__":
     # parser = Parser(start=True, startBlock=0, endBlock=100, fileName="100")
     # d = pickle.load(open("/scratch/cluster/xh3426/etherData/100.p", "rb"))
     # print(d)
-    print(parser.highestBlockEth())
+    # print(parser.highestBlockEth())
+
+
