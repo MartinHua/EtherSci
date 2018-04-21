@@ -14,16 +14,21 @@ from shard import recvAll, sendAll, msgLength
 
 sendFromPorts  = [randint(2602,29999),randint(2602,29999),randint(2602,29999),randint(2602,29999),randint(2602,29999)]
 
+updatePort = 4000
+
 
 script_dir = os.path.dirname(os.path.dirname(__file__))+'/EtherData-master/'
+
 
 
 class slave(threading.Thread):
 
     def __init__(self, sid, Port,partition,precision):
+
         self.sid = sid
         self.message = ""
         self.Port = Port
+
         self.offset = 4000000
         self.host = socket.gethostname()
         self.lock = threading.Lock()
@@ -41,12 +46,31 @@ class slave(threading.Thread):
                     self.tree.update(blks[idx])
                 mapping.buildMap(num, filename)
 
+        self.updatePort = updatePort
+
+        self.host = socket.gethostname()
+        self.lock = threading.Lock()
+        data = dict()
+        # mapping = time2blk()
+        # mapping.setBegin(4000000)
+        # for i in range(50):
+        #     num = 4000000 + i * 1000
+        #     filename = str(num) + '.p'
+        #     with open(script_dir + filename, 'rb') as f:
+        #         temp = pickle.load(f)
+        #         data.update(temp)
+        #         mapping.buildMap(num, filename)
+
+        # self.tree = blkSegTree(data, 4000000, precision, sid, partition)
+        threading.Thread.__init__(self)
+>>>>>>> origin/master
+
         threading.Thread.__init__(self)
 
     #
 
     def run(self):
-
+        threading.Thread(target=self.listen_new_block, args=()).start()
         self.s = socket.socket()  # Create a socket object
         self.s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.s.bind((self.host, self.Port))  # Bind to the clientPort
@@ -71,6 +95,18 @@ class slave(threading.Thread):
                     except EOFError:
                         break
 
+    def listen_new_block(self,):
+        self.s = socket.socket()  # Create a socket object
+        self.s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        self.s.bind((self.host, self.updatePort))  # Bind to the clientPort
+        self.s.listen(5)  # Now wait for client connection.
+        while True:
+            print("here")
+            packageBlk, addr = self.s.accept()  # Establish connection with client.
+            rawblk = recvAll(packageBlk)
+            blk = pickle.load(io.BytesIO(rawblk))
+            print(blk)
+
 
     def sendBack(self,answer,toAddr):
         s = socket.socket()
@@ -82,3 +118,7 @@ class slave(threading.Thread):
 
     def query(self,start,end,rangeStart=0,rangeEnd=5):
         return self.tree.query_txFee_range(start, end , rangeStart, rangeEnd)
+
+
+s = slave(0,3333,1,1)
+s.start()
