@@ -138,10 +138,10 @@ def query(start,end,offset):
 #         print (ans)
 if __name__ == "__main__":
     from shard_slave import slave
-    s0 = slave(0,listenPort,  2,1)
+    s0 = slave(0,listenPort,  2)
     s0.start()
-    s1 = slave(1,listenPort+1,2,1)
-    s1.start()
+    #s1 = slave(1,listenPort+1,2)
+    #s1.start()
 
 
     #prepare the listening channel for slaves
@@ -149,7 +149,7 @@ if __name__ == "__main__":
     time.sleep(0.2)
 
 
-    query(4000000,4000999,0)
-    query(4000000,4000999,1)
+    print ('test:', query(4000000,4000999,0))
+    #query(4000000,4000999,1)
     # query(2,5,1)
     #query('query_txFee_range', 4000000, 4000999)

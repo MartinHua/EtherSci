@@ -12,7 +12,7 @@ class blkNode:  # store block info
         self.left = None
         self.right = None
         self.txFee = 0
-        self.precision = precision
+        self.precision = 1
         n = int(10 / self.precision)
         self.rangeTx = [0] * n
         self.numTx = 0
@@ -39,8 +39,8 @@ class blkSegTree(object):
 
     def __init__(self, offset, size):
         self.offset = offset
-        self.filledID = 0
-        self.precision = 10
+        self.filledID = offset
+        self.precision = 1
         self.size = size
         def getNode(start, end, blks, precision):
             index = self.id + self.offset + self.partition * (start - self.offset)
@@ -79,15 +79,16 @@ class blkSegTree(object):
 
         # update the whole path
 
-        def updateHelper( blk, node):
+        def updateHelper(blk, node):
 
             if node.start == self.filledID and node.end == self.filledID + 1:
                 node.txFee = blk["txFee"]
                 n = int(10 / self.precision)
                 node.rangeTx = [0] * n
+
                 for i in range(n):
-                    node.rangeTx[i] = node.countRange(0.0001 * self.filledID * self.precision, 0.0001 * (self.filledID + 1) * self.precision,
-                                                      blk)
+                    node.rangeTx[i] = node.countRange(0.0001 * i * self.precision, 0.0001 * (i + 1) * self.precision, blk)
+                #print(node.rangeTx)
                 node.numTx = len(blk['transactions'])
 
                 return
@@ -99,10 +100,10 @@ class blkSegTree(object):
             node.txFee = node.left.txFee + node.right.txFee
             node.numTx = node.left.numTx + node.right.numTx
             node.rangeTx = [x + y for x, y in zip(node.left.rangeTx, node.right.rangeTx)]
-
+        #print ('put in ', self.filledID)
         updateHelper(blk, self.root)
         self.filledID += 1
-        assert (self.filledID <= self.size)
+        #assert (self.filledID <= self.offset + self.size)
     def inorder(self, root):
         if root == None:
             return
@@ -144,12 +145,14 @@ class blkSegTree(object):
                 return 0
             if i == node.start and j == node.end:
                 count = 0
+
                 for x in range(low, up):
+
                     count += node.rangeTx[x]
-                print('[debug] ', node.start, node.end, node.rangeTx)
+
                 return count
             mid = int(node.start + (node.end - node.start) / 2)
-            print('[debug] mid', mid)
+            #print('[debug] mid', mid)
             return rangeHelper(i, min(j, mid), node.left) + rangeHelper(max(i, mid), j, node.right)
 
         return rangeHelper(i, j + 1, self.root)

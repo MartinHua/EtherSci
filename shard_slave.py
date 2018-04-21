@@ -19,11 +19,15 @@ updatePort = 4000
 
 script_dir = os.path.dirname(os.path.dirname(__file__))+'/EtherData-master/'
 
-
+loadFileNum = 10
+fileBlockNum = 1000
+toStoreTotalBlockNum = fileBlockNum*loadFileNum
 
 class slave(threading.Thread):
 
-    def __init__(self, sid, Port,partition,precision):
+
+
+    def __init__(self, sid, Port, partition):
 
         self.sid = sid
         self.message = ""
@@ -34,43 +38,39 @@ class slave(threading.Thread):
         self.lock = threading.Lock()
         self.partition = partition
         # create a empty tree
-        self.tree = blkSegTree(4000000, 2000000) # offset (starting blk number), size of the tree
+        self.tree = blkSegTree(self.offset, 100000) # offset (starting blk number), size of the tree
         mapping = time2blk()
-        mapping.setBegin(4000000)
-        for i in range(50):
-            num = 4000000 + i * 1000
-            filename = str(num) + '.p'
+        mapping.setBegin(self.offset)
+
+        for i in range(loadFileNum):
+
+            filename = str(self.offset) + '.p'
             with open(script_dir + filename, 'rb') as f:
                 blks = pickle.load(f)
-                for idx in range(self.sid, 1000, self.partition):
-                    self.tree.update(blks[idx])
-                mapping.buildMap(num, filename)
+                #print ('open file', filename, 'check start data', blks[self.offset])
+                for idx in range(int(fileBlockNum/self.partition)):
+
+                    self.tree.update(self.getBlock(blks, idx))
+                mapping.buildMap(self.offset, filename)
+            self.offset += fileBlockNum
+            #print('current tree size', self.tree.size)
 
         self.updatePort = updatePort
-
         self.host = socket.gethostname()
         self.lock = threading.Lock()
-        data = dict()
-        # mapping = time2blk()
-        # mapping.setBegin(4000000)
-        # for i in range(50):
-        #     num = 4000000 + i * 1000
-        #     filename = str(num) + '.p'
-        #     with open(script_dir + filename, 'rb') as f:
-        #         temp = pickle.load(f)
-        #         data.update(temp)
-        #         mapping.buildMap(num, filename)
-
-        # self.tree = blkSegTree(data, 4000000, precision, sid, partition)
-        threading.Thread.__init__(self)
->>>>>>> origin/master
 
         threading.Thread.__init__(self)
+        #threading.Thread(target=self.listen_new_block, args=()).start()
 
-    #
+    def getBlock(self, blks, idx):
+
+        index =  self.sid + self.offset + idx * self.partition
+        #print (idx, index, self.offset)
+        #print (index, blks[index])
+        return blks[index]
+
 
     def run(self):
-        threading.Thread(target=self.listen_new_block, args=()).start()
         self.s = socket.socket()  # Create a socket object
         self.s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.s.bind((self.host, self.Port))  # Bind to the clientPort
@@ -94,16 +94,20 @@ class slave(threading.Thread):
                             self.sendBack(answer,entry[3])
                     except EOFError:
                         break
+    #
+    # def listen_new_block(self,):
+    #     self.updateSocket = socket.socket()
+    #     self.updateSocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    #     self.updateSocket.bind((self.host, self.updatePort))  # Bind to the clientPort
+    #     self.updateSocket.listen(5)  # Now wait for client connection.
+    #     while True:
+    #         print("here,here,here")
+    #         package, addr = self.updateSocket.accept()  # Establish connection with client.
+    #         threading.Thread(target=self.on_update_block, args=(package,)).start()
 
-    def listen_new_block(self,):
-        self.s = socket.socket()  # Create a socket object
-        self.s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        self.s.bind((self.host, self.updatePort))  # Bind to the clientPort
-        self.s.listen(5)  # Now wait for client connection.
+    def on_update_block(self,package):
         while True:
-            print("here")
-            packageBlk, addr = self.s.accept()  # Establish connection with client.
-            rawblk = recvAll(packageBlk)
+            rawblk = recvAll(package)
             blk = pickle.load(io.BytesIO(rawblk))
             print(blk)
 
@@ -116,9 +120,10 @@ class slave(threading.Thread):
         sendAll(s, pickle.dumps(("answer", answer)), msgLength)
         return 0
 
-    def query(self,start,end,rangeStart=0,rangeEnd=5):
+    def query(self,start,end,rangeStart=1,rangeEnd=5):
         return self.tree.query_txFee_range(start, end , rangeStart, rangeEnd)
+        #return self.tree.query_txFee_Num(start, end)
 
-
-s = slave(0,3333,1,1)
+s = slave(0,randint(5000,10000),2)
 s.start()
+print ('test', s.query(4000000, 4000100))
