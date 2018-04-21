@@ -19,6 +19,12 @@ import seaborn as sns
 from time2blk import time2blk
 from SegTree import *
 
+listenPort = randint(30000, 40000)
+# slaveAddress = ('fidelio',slavePort) #('idomeneo',slavePort)#
+masterListenPort = randint(26002, 29999)
+# masterAddr = (socket.gethostname(), masterPort)
+listenAddr = (socket.gethostname(), masterListenPort)
+host = socket.gethostname()
 msgLength = 1024
 def recvAll(socket, length=msgLength):
     data = b''
@@ -56,13 +62,12 @@ def on_new_answer(addr):
         msg = t.recv(1024)
         print(pickle.loads(msg))
 
-def query(start,end):
+def query(start,end,offset):
     s = socket.socket()
-    addr = (socket.gethostname(), slavePort)
     s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    s.bind(masterAddr)
-    s.connect(slaveAddress)
-    message = pickle.dumps(("query", start, end))
+    s.bind((host, randint(30000, 40000)))
+    s.connect((host, listenPort+offset))
+    message = pickle.dumps(("query", start, end,listenAddr))
     s.sendall(message)
 
 #
@@ -98,20 +103,20 @@ def query(start,end):
 ###############
 # build tree
 ###############
-data = dict()
-mapping = time2blk()
-mapping.setBegin(4000000)
-for i in range(1):
-    num = 4000000 + i*1000
-    filename = str(num) +'.p'
-    with open('/u/cchsu/Downloads/EtherData-master/' + filename, 'rb') as f:
-        temp = pickle.load(f)
-        data.update(temp)
-        mapping.buildMap(num, filename)
-
-# 2 partition
-s0= blkSegTree(data, 4000000, 1, 0, 2)
-s1= blkSegTree(data, 4000000, 1, 1, 2)
+# data = dict()
+# mapping = time2blk()
+# mapping.setBegin(4000000)
+# for i in range(1):
+#     num = 4000000 + i*1000
+#     filename = str(num) +'.p'
+#     with open('/u/fuli2015/Downloads/EtherData-master/' + filename, 'rb') as f:
+#         temp = pickle.load(f)
+#         data.update(temp)
+#         mapping.buildMap(num, filename)
+#
+# # 2 partition
+# s0= blkSegTree(data, 4000000, 1, 0, 2)
+# s1= blkSegTree(data, 4000000, 1, 1, 2)
 
 # 1 partition
 #s0 = blkSegTree(data, 4000000, 1, 0, 1)
@@ -120,18 +125,31 @@ s1= blkSegTree(data, 4000000, 1, 1, 2)
 ###################
 #
 ################
-def query(type, start, end):
-    partition = 2
-    low = start
-    high = start + int((end - start)/partition)
-    print (low, high)
-    if type == 'query_txFee_range':
-        ans = 0
-        #ans += s0.query_txFee_Num(low,high)
-        #ans += s1.query_txFee_Num(low, high)
-        ans += s0.query_txFee_range(low, high, 1, 9)
-        ans += s1.query_txFee_range(low, high, 1, 9)
-        #s1.inorder(s1.root)
-        print (ans)
+# def query(type, start, end):
+#     partition = 2
+#     low = start
+#     high = start + int((end - start)/partition)
+#     print (low, high)
+#     if type == 'query_txFee_range':
+#         ans = 0
+#         #ans += s0.query_txFee_Num(low,high)
+#         #ans += s1.query_txFee_Num(low, high)
+#         ans += s0.query_txFee_range(low, high, 1, 9)
+#         ans += s1.query_txFee_range(low, high, 1, 9)
+#         #s1.inorder(s1.root)
+#         print (ans)
+s0 = slave(0,listenPort,  2,1)
+s0.start()
+s1 = slave(1,listenPort+1,2,1)
+s1.start()
 
-query('query_txFee_range', 4000000, 4000999)
+
+#prepare the listening channel for slaves
+threading.Thread(target=on_new_answer, args=(listenAddr,)).start()
+time.sleep(0.2)
+
+
+query(4000000,4000999,0)
+query(4000000,4000999,1)
+# query(2,5,1)
+#query('query_txFee_range', 4000000, 4000999)
