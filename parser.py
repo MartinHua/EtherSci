@@ -70,7 +70,8 @@ class Parser(object):
         res = requests.post(
               self.url,
               data=json.dumps(payload),
-              headers=self.headers).json()
+              headers=self.headers
+            ).json()
         return res[key]
 
     def getBlock(self, n):

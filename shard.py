@@ -17,12 +17,14 @@ import seaborn as sns
 from time2blk import time2blk
 from SegTree import *
 
-listenPort = randint(30000, 40000)
+listenPort= randint(30000, 40000)
 # slaveAddress = ('fidelio',slavePort) #('idomeneo',slavePort)#
 masterListenPort = randint(26002, 29999)
 # masterAddr = (socket.gethostname(), masterPort)
 listenAddr = (socket.gethostname(), masterListenPort)
 host = socket.gethostname()
+
+
 msgLength = 1024
 def recvAll(socket, length=msgLength):
     data = b''
