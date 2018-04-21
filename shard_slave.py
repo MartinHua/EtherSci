@@ -24,23 +24,26 @@ class slave(threading.Thread):
         self.sid = sid
         self.message = ""
         self.Port = Port
-
+        self.offset = 4000000
         self.host = socket.gethostname()
         self.lock = threading.Lock()
-        data = dict()
+        self.partition = partition
+        # create a empty tree
+        self.tree = blkSegTree(4000000, 2000000) # offset (starting blk number), size of the tree
         mapping = time2blk()
         mapping.setBegin(4000000)
         for i in range(50):
             num = 4000000 + i * 1000
             filename = str(num) + '.p'
             with open(script_dir + filename, 'rb') as f:
-                temp = pickle.load(f)
-                data.update(temp)
+                blks = pickle.load(f)
+                for idx in range(self.sid, 1000, self.partition):
+                    self.tree.update(blks[idx])
                 mapping.buildMap(num, filename)
-        self.tree = blkSegTree(data, 4000000, precision, sid, partition)
+
         threading.Thread.__init__(self)
 
-
+    #
 
     def run(self):
 
