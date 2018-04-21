@@ -28,8 +28,26 @@ class slave(threading.Thread):
         self.sid = sid
         self.message = ""
         self.Port = Port
+
+        self.offset = 4000000
+        self.host = socket.gethostname()
+        self.lock = threading.Lock()
+        self.partition = partition
+        # create a empty tree
+        self.tree = blkSegTree(4000000, 2000000) # offset (starting blk number), size of the tree
+        mapping = time2blk()
+        mapping.setBegin(4000000)
+        for i in range(50):
+            num = 4000000 + i * 1000
+            filename = str(num) + '.p'
+            with open(script_dir + filename, 'rb') as f:
+                blks = pickle.load(f)
+                for idx in range(self.sid, 1000, self.partition):
+                    self.tree.update(blks[idx])
+                mapping.buildMap(num, filename)
+
         self.updatePort = updatePort
-        self.updateSocket = socket.socket()
+
         self.host = socket.gethostname()
         self.lock = threading.Lock()
         data = dict()
@@ -45,11 +63,11 @@ class slave(threading.Thread):
 
         # self.tree = blkSegTree(data, 4000000, precision, sid, partition)
         threading.Thread.__init__(self)
-        threading.Thread(target=self.listen_new_block, args=()).start()
 
 
 
     def run(self):
+        threading.Thread(target=self.listen_new_block, args=()).start()
         self.s = socket.socket()  # Create a socket object
         self.s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.s.bind((self.host, self.Port))  # Bind to the clientPort
@@ -88,8 +106,6 @@ class slave(threading.Thread):
             rawblk = recvAll(package)
             blk = pickle.load(io.BytesIO(rawblk))
             print(blk)
-            #print(len(blk['transactions']))
-
 
 
     def sendBack(self,answer,toAddr):
@@ -104,5 +120,5 @@ class slave(threading.Thread):
         return self.tree.query_txFee_range(start, end , rangeStart, rangeEnd)
 
 
-s = slave(0,4655,1,1)
+s = slave(0,3333,1,1)
 s.start()
