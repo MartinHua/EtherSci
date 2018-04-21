@@ -22,7 +22,7 @@ updatePort = 4000
 
 script_dir = os.path.dirname(os.path.dirname(__file__))+'/EtherData-master/'
 
-loadFileNum = 50
+loadFileNum = 1
 fileBlockNum = 1000
 toStoreTotalBlockNum = fileBlockNum*loadFileNum
 
