@@ -19,32 +19,46 @@ updatePort = 4000
 
 script_dir = os.path.dirname(os.path.dirname(__file__))+'/EtherData-master/'
 
-
-
+loadFileNum = 50
+fileBlockNum = 1000
+treeSize = 1000
 class slave(threading.Thread):
+
+
 
     def __init__(self, sid, Port,partition,precision):
 
         self.sid = sid
         self.message = ""
         self.Port = Port
-        self.updatePort = updatePort
 
+        self.offset = 4000000
         self.host = socket.gethostname()
         self.lock = threading.Lock()
-        data = dict()
-        # mapping = time2blk()
-        # mapping.setBegin(4000000)
-        # for i in range(50):
-        #     num = 4000000 + i * 1000
-        #     filename = str(num) + '.p'
-        #     with open(script_dir + filename, 'rb') as f:
-        #         temp = pickle.load(f)
-        #         data.update(temp)
-        #         mapping.buildMap(num, filename)
+        self.partition = partition
+        # create a empty tree
+        self.tree = blkSegTree(self.offset, 2000000) # offset (starting blk number), size of the tree
+        mapping = time2blk()
+        mapping.setBegin(self.offset)
+        for i in range(loadFileNum):
+            num = self.offset + i * fileBlockNum
+            filename = str(num) + '.p'
+            with open(script_dir + filename, 'rb') as f:
+                blks = pickle.load(f)
+                for idx in range(treeSize):
+                    self.tree.update(self.getBlock(idx))
+                mapping.buildMap(num, filename)
 
-        # self.tree = blkSegTree(data, 4000000, precision, sid, partition)
+        self.updatePort = updatePort
+        self.host = socket.gethostname()
+        self.lock = threading.Lock()
+
         threading.Thread.__init__(self)
+        threading.Thread(target=self.listen_new_block, args=()).start()
+
+    def getBlock(self, idx):
+        for idx in range(self.sid, fileBlockNum, self.partition):
+            self.tree.update(blks[idx])
 
 
 
@@ -75,14 +89,17 @@ class slave(threading.Thread):
                         break
 
     def listen_new_block(self,):
-        self.s = socket.socket()  # Create a socket object
-        self.s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        self.s.bind((self.host, self.updatePort))  # Bind to the clientPort
-        self.s.listen(5)  # Now wait for client connection.
+        self.updateSocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        self.updateSocket.bind((self.host, self.updatePort))  # Bind to the clientPort
+        self.updateSocket.listen(5)  # Now wait for client connection.
         while True:
-            print("here")
-            packageBlk, addr = self.s.accept()  # Establish connection with client.
-            rawblk = recvAll(packageBlk)
+            print("here,here,here")
+            package, addr = self.updateSocket.accept()  # Establish connection with client.
+            threading.Thread(target=self.on_update_block, args=(package,)).start()
+
+    def on_update_block(self,package):
+        while True:
+            rawblk = recvAll(package)
             blk = pickle.load(io.BytesIO(rawblk))
             print(blk)
 
