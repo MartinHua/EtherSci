@@ -7,6 +7,7 @@ from ctypes import c_int, addressof
 import pickle
 import sys
 import os
+import io
 import pickle
 import time
 import datetime
@@ -32,7 +33,7 @@ def recvAll(socket, length=msgLength):
         packet = socket.recv(length)
         data += packet
         try:
-            pickle.loads(data)
+            pickle.load(io.BytesIO(data))
             return data
         except:
             continue
