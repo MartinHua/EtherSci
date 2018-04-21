@@ -63,9 +63,7 @@ class slave(threading.Thread):
 
         # self.tree = blkSegTree(data, 4000000, precision, sid, partition)
         threading.Thread.__init__(self)
->>>>>>> origin/master
 
-        threading.Thread.__init__(self)
 
     #
 
