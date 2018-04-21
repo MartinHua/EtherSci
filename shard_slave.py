@@ -27,7 +27,7 @@ class slave(threading.Thread):
 
 
 
-    def __init__(self, sid, Port, partition):
+    def __init__(self, sid, Port,partition,precision):
 
         self.sid = sid
         self.message = ""
@@ -60,7 +60,7 @@ class slave(threading.Thread):
         self.lock = threading.Lock()
 
         threading.Thread.__init__(self)
-        #threading.Thread(target=self.listen_new_block, args=()).start()
+        threading.Thread(target=self.listen_new_block, args=()).start()
 
     def getBlock(self, blks, idx):
 
@@ -94,21 +94,22 @@ class slave(threading.Thread):
                             self.sendBack(answer,entry[3])
                     except EOFError:
                         break
-    #
-    # def listen_new_block(self,):
-    #     self.updateSocket = socket.socket()
-    #     self.updateSocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    #     self.updateSocket.bind((self.host, self.updatePort))  # Bind to the clientPort
-    #     self.updateSocket.listen(5)  # Now wait for client connection.
-    #     while True:
-    #         print("here,here,here")
-    #         package, addr = self.updateSocket.accept()  # Establish connection with client.
-    #         threading.Thread(target=self.on_update_block, args=(package,)).start()
+
+    def listen_new_block(self,):
+        self.updateSocket = socket.socket()
+        self.updateSocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        self.updateSocket.bind((self.host, self.updatePort))  # Bind to the clientPort
+        self.updateSocket.listen(5)  # Now wait for client connection.
+        while True:
+            print("here,here,here")
+            package, addr = self.updateSocket.accept()  # Establish connection with client.
+            threading.Thread(target=self.on_update_block, args=(package,)).start()
 
     def on_update_block(self,package):
         while True:
             rawblk = recvAll(package)
             blk = pickle.load(io.BytesIO(rawblk))
+            self.tree.update(blk)
             print(blk)
 
 
@@ -122,8 +123,7 @@ class slave(threading.Thread):
 
     def query(self,start,end,rangeStart=1,rangeEnd=5):
         return self.tree.query_txFee_range(start, end , rangeStart, rangeEnd)
-        #return self.tree.query_txFee_Num(start, end)
 
-s = slave(0,randint(5000,10000),2)
+s = slave(0,randint(5000,10000),2,1)
 s.start()
 print ('test', s.query(4000000, 4000100))
