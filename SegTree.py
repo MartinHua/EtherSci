@@ -155,29 +155,30 @@ class blkSegTree(object):
         return rangeHelper(i, j + 1, self.root)
 
 
-# l = [ 8, 0, 5, 4, 3, 12, 18, 2, 1]
-l = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-bs = []
-for i in range(10):
-    b = dict()
-    b["txFee"] = l[i]
-    t = dict()
-    t["txFee"] = 0.0005
-    b["transactions"] = [t]
-    bs.append(b)
+if __name__ == "__main__":
+    # l = [ 8, 0, 5, 4, 3, 12, 18, 2, 1]
+    l = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+    bs = []
+    for i in range(10):
+        b = dict()
+        b["txFee"] = l[i]
+        t = dict()
+        t["txFee"] = 0.0005
+        b["transactions"] = [t]
+        bs.append(b)
 
 
 
-s1 = blkSegTree(0, 5)
+    s1 = blkSegTree(0, 5)
 
-s1.inorder(s1.root)
-print('-----')
+    s1.inorder(s1.root)
+    print('-----')
 
-s1.update(bs[0])
-s1.update(bs[1])
-s1.update(bs[2])
-s1.update(bs[3])
-s1.update(bs[4])
-print('-----')
-s1.inorder(s1.root)
+    s1.update(bs[0])
+    s1.update(bs[1])
+    s1.update(bs[2])
+    s1.update(bs[3])
+    s1.update(bs[4])
+    print('-----')
+    s1.inorder(s1.root)
 

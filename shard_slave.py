@@ -19,9 +19,12 @@ updatePort = 4000
 
 script_dir = os.path.dirname(os.path.dirname(__file__))+'/EtherData-master/'
 
-
-
+loadFileNum = 50
+fileBlockNum = 1000
+treeSize = 1000
 class slave(threading.Thread):
+
+
 
     def __init__(self, sid, Port,partition,precision):
 
@@ -34,35 +37,28 @@ class slave(threading.Thread):
         self.lock = threading.Lock()
         self.partition = partition
         # create a empty tree
-        self.tree = blkSegTree(4000000, 2000000) # offset (starting blk number), size of the tree
+        self.tree = blkSegTree(self.offset, 2000000) # offset (starting blk number), size of the tree
         mapping = time2blk()
-        mapping.setBegin(4000000)
-        for i in range(50):
-            num = 4000000 + i * 1000
+        mapping.setBegin(self.offset)
+        for i in range(loadFileNum):
+            num = self.offset + i * fileBlockNum
             filename = str(num) + '.p'
             with open(script_dir + filename, 'rb') as f:
                 blks = pickle.load(f)
-                for idx in range(self.sid, 1000, self.partition):
-                    self.tree.update(blks[idx])
+                for idx in range(treeSize):
+                    self.tree.update(self.getBlock(idx))
                 mapping.buildMap(num, filename)
 
         self.updatePort = updatePort
-
         self.host = socket.gethostname()
         self.lock = threading.Lock()
-        data = dict()
-        # mapping = time2blk()
-        # mapping.setBegin(4000000)
-        # for i in range(50):
-        #     num = 4000000 + i * 1000
-        #     filename = str(num) + '.p'
-        #     with open(script_dir + filename, 'rb') as f:
-        #         temp = pickle.load(f)
-        #         data.update(temp)
-        #         mapping.buildMap(num, filename)
 
-        # self.tree = blkSegTree(data, 4000000, precision, sid, partition)
         threading.Thread.__init__(self)
+        threading.Thread(target=self.listen_new_block, args=()).start()
+
+    def getBlock(self, idx):
+        for idx in range(self.sid, fileBlockNum, self.partition):
+            self.tree.update(blks[idx])
 
 
 
