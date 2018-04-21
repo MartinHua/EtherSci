@@ -6,21 +6,19 @@ script_dir = os.path.dirname(os.path.dirname(__file__))+'/EtherData-master/'
 
 # this class helps to build a array where idx represent timestamp and value is the block number. idx = real_ - begin_ts
 class time2blk: # store block info
-    def __init__(self):
-        self.map = []
-        self.begin = 0
-        self.size = 0
-    def setBegin(self, offset):
+    def __init__(self, offset, size):
+        self.map = [None]*size
         self.begin = offset
+        self.size = size
+        self.filledID = 0
 
     def buildMap(self, offset, filename):
         with open(script_dir + filename, 'rb') as f:
             data = pickle.load(f)
         s = len(data)
 
-
-        self.map.extend([None]*s)
-        self.size += s
+        #self.map.extend([None]*s)
+        self.filledID += s
         print ('size of map ', len(self.map))
         for i in range(s):
             idx =  offset + i - self.begin
@@ -28,8 +26,11 @@ class time2blk: # store block info
             self.map[idx] = data[offset+i]["timestamp"]
         f.close()
 
-        print (self.map[0], self.map[900])
+        print (self.map[0], self.map[self.filledID-1])
         return
+    def update(self, blk):
+        self.map[self.filledID] = blk["timestamp"]
+        self.filledID += 1
     def getBlk(self, t):
 
 
@@ -37,11 +38,13 @@ class time2blk: # store block info
         timestamp_int= int(timestamp)
 
         chk = timestamp_int
-        if chk > self.map[self.size-1] or chk < self.map[0]:
+        if chk > self.map[self.filledID-1] or chk < self.map[0]:
 
-            print ('error query. do not have data in this range')
-            print ('Query ts is', chk, ', start from', self.map[0], '; end to:',  self.map[self.size-1])
-            return
+            print ('!!!error query. exceed boundary')
+            print ('Query ts is', chk, ', start from', self.map[0], '; end to:',  self.map[self.filledID-1])
+            if chk > self.map[self.filledID-1]:
+                return self.size - 1
+            return 0
         res = self.binarySearch(0, self.size-1, chk)
         return res
     def binarySearch( self,l, r, x):

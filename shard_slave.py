@@ -12,6 +12,9 @@ import datetime
 from shard import recvAll, sendAll, msgLength
 
 
+
+
+
 sendFromPorts  = [randint(2602,29999),randint(2602,29999),randint(2602,29999),randint(2602,29999),randint(2602,29999)]
 
 updatePort = 4000
@@ -19,7 +22,7 @@ updatePort = 4000
 
 script_dir = os.path.dirname(os.path.dirname(__file__))+'/EtherData-master/'
 
-loadFileNum = 10
+loadFileNum = 50
 fileBlockNum = 1000
 toStoreTotalBlockNum = fileBlockNum*loadFileNum
 
@@ -39,8 +42,8 @@ class slave(threading.Thread):
         self.partition = partition
         # create a empty tree
         self.tree = blkSegTree(self.offset, 100000) # offset (starting blk number), size of the tree
-        mapping = time2blk()
-        mapping.setBegin(self.offset)
+        self.mapping = time2blk(self.offset, 100000)
+        #self.mapping.setBegin(self.offset)
 
         for i in range(loadFileNum):
 
@@ -51,7 +54,8 @@ class slave(threading.Thread):
                 for idx in range(int(fileBlockNum/self.partition)):
 
                     self.tree.update(self.getBlock(blks, idx))
-                mapping.buildMap(self.offset, filename)
+
+                self.mapping.buildMap(self.offset, filename)
             self.offset += fileBlockNum
             #print('current tree size', self.tree.size)
 
@@ -110,6 +114,8 @@ class slave(threading.Thread):
             rawblk = recvAll(package)
             blk = pickle.load(io.BytesIO(rawblk))
             self.tree.update(blk)
+            self.mapping.update(blk)
+            self.draw()
             print(blk)
 
 
@@ -122,8 +128,77 @@ class slave(threading.Thread):
         return 0
 
     def query(self,start,end,rangeStart=1,rangeEnd=5):
-        return self.tree.query_txFee_range(start, end , rangeStart, rangeEnd)
+        #return self.tree.query_txFee_range(start, end , rangeStart, rangeEnd)
+        return self.tree.query_txFee_Sum(start, end)
 
-s = slave(0,randint(5000,10000),2,1)
+    def draw(self):
+        import matplotlib.pyplot as plt
+        import numpy as np
+        import seaborn as sns
+        test = [0] * 31
+        pre_b = 0
+
+        for i in range(1, 31):
+            t = str(i) + "/07/2017 00:00"
+            blk = self.mapping.getBlk(t)
+            # print (blk)
+            # print (pre_b, blk)
+            test[i] = self.query(4000000 + pre_b, 4000000 + blk)
+            pre_b = blk
+
+        sns.set_style("darkgrid")
+        plt.plot(test[1:30])
+        plt.xlabel('days')
+        plt.ylabel('Transaction Fees')
+        plt.title('Transaction Fees (per block) per day')
+        plt.show()
+
+s = slave(0,randint(5000,10000),1,1)
 s.start()
 print ('test', s.query(4000000, 4000100))
+
+
+# # test--- get transactopn fees per hour for 12/07/2017
+# import matplotlib.pyplot as plt
+# import numpy as np
+# import seaborn as sns
+# test = [0]*24
+# pre_b = 0
+#
+# for i in range(24):
+#     t = "12/07/2017 " + str(i) + ":00"
+#     blk = s.mapping.getBlk(t)
+#     #print (blk)
+#     #print (pre_b, blk)
+#     test[i] = s.query(4000000+ pre_b, 4000000 + blk)
+#     pre_b = blk
+#
+#
+# sns.set_style("darkgrid")
+# plt.plot(test[1:24])
+# plt.xlabel('Hours')
+# plt.ylabel('Transaction Fees')
+# plt.title('Transaction Fees (per block) per hour')
+# plt.show()
+
+import matplotlib.pyplot as plt
+import numpy as np
+import seaborn as sns
+test = [0] * 31
+pre_b = 0
+
+for i in range(1, 31):
+    t = str(i) + "/07/2017 00:00"
+    blk = s.mapping.getBlk(t)
+    # print (blk)
+    # print (pre_b, blk)
+    test[i] = s.query(4000000 + pre_b, 4000000 + blk)
+    pre_b = blk
+
+sns.set_style("darkgrid")
+plt.plot(test[1:30])
+plt.xlabel('days')
+plt.ylabel('Transaction Fees')
+plt.title('Transaction Fees (per block) per day')
+plt.show()
+
