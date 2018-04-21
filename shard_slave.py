@@ -6,23 +6,7 @@ import sys
 from random import randint
 import time
 import datetime
-
-msgLength = 1024
-
-def recvAll(socket, length):
-    data = b''
-    while True:
-        packet = socket.recv(length)
-        data += packet
-        if len(packet) < length:
-            return data
-
-def sendAll(socket, data, length):
-    cnt = length
-    while cnt < len(data):
-        socket.sendall(data[(cnt - length): cnt])
-        cnt += length
-    socket.sendall(data[(cnt - length): cnt])
+from shard import recvAll, sendAll, msgLength
 
 
 sendFromPorts  = [randint(2602,29999),randint(2602,29999),randint(2602,29999),randint(2602,29999),randint(2602,29999)]

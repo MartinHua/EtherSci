@@ -2,27 +2,9 @@ import socket
 import threading
 
 import pickle
+from shard import recvAll, sendAll, msgLength
 
 
-'''
-lastOpDict = {key:(sTime, sid),}
-'''
-
-msgLength = 1024
-def recvAll(socket, length):
-    data = b''
-    while True:
-        packet = socket.recv(length)
-        data += packet
-        if len(packet) < length:
-            return data
-def sendAll(socket, data, length):
-    cnt = length
-    while cnt < len(data):
-        # print(data[(cnt - length): cnt])
-        socket.sendall(data[(cnt - length): cnt])
-        cnt += length
-    socket.sendall(data[(cnt - length): len(data)])
 
 class master(threading.Thread):
 
@@ -72,7 +54,6 @@ class master(threading.Thread):
         timeTuple = pickle.loads(msg)
         self.vclock.merge(timeTuple[0])
         self.lastOpDict[key] = (timeTuple[1], timeTuple[2])
-
 
 
     def connect(self, sport):

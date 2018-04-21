@@ -77,13 +77,14 @@ class Parser(object):
         """Get a specific block from the blockchain and filter the data."""
         data = self._rpcRequest("eth_getBlockByNumber", [hex(n), True], "result")
         block = parser_util.decodeBlock(data)
-        txFee = 0
-        for t in block["transactions"]:
-            receipt = self._rpcRequest("eth_getTransactionReceipt", [t["txHash"]], "result")
-            t["gasUsed"] = int(receipt["gasUsed"], 16)
-            t["txFee"] = t["gasUsed"] * t["gasPrice"]
-            txFee += t["txFee"]
-        block["txFee"] = txFee
+        if block:
+            txFee = 0
+            for t in block["transactions"]:
+                receipt = self._rpcRequest("eth_getTransactionReceipt", [t["txHash"]], "result")
+                t["gasUsed"] = int(receipt["gasUsed"], 16)
+                t["txFee"] = t["gasUsed"] * t["gasPrice"]
+                txFee += t["txFee"]
+            block["txFee"] = txFee
         return block
 
     def highestBlockEth(self):
