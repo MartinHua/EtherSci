@@ -29,7 +29,7 @@ class slave(threading.Thread):
         self.message = ""
         self.Port = Port
         self.updatePort = updatePort
-
+        self.updateSocket = socket.socket()
         self.host = socket.gethostname()
         self.lock = threading.Lock()
         data = dict()
@@ -45,11 +45,11 @@ class slave(threading.Thread):
 
         # self.tree = blkSegTree(data, 4000000, precision, sid, partition)
         threading.Thread.__init__(self)
+        threading.Thread(target=self.listen_new_block, args=()).start()
 
 
 
     def run(self):
-        threading.Thread(target=self.listen_new_block, args=()).start()
         self.s = socket.socket()  # Create a socket object
         self.s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.s.bind((self.host, self.Port))  # Bind to the clientPort
@@ -75,16 +75,21 @@ class slave(threading.Thread):
                         break
 
     def listen_new_block(self,):
-        self.s = socket.socket()  # Create a socket object
-        self.s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        self.s.bind((self.host, self.updatePort))  # Bind to the clientPort
-        self.s.listen(5)  # Now wait for client connection.
+        self.updateSocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        self.updateSocket.bind((self.host, self.updatePort))  # Bind to the clientPort
+        self.updateSocket.listen(5)  # Now wait for client connection.
         while True:
-            print("here")
-            packageBlk, addr = self.s.accept()  # Establish connection with client.
-            rawblk = recvAll(packageBlk)
+            print("here,here,here")
+            package, addr = self.updateSocket.accept()  # Establish connection with client.
+            threading.Thread(target=self.on_update_block, args=(package,)).start()
+
+    def on_update_block(self,package):
+        while True:
+            rawblk = recvAll(package)
             blk = pickle.load(io.BytesIO(rawblk))
             print(blk)
+            #print(len(blk['transactions']))
+
 
 
     def sendBack(self,answer,toAddr):
@@ -99,5 +104,5 @@ class slave(threading.Thread):
         return self.tree.query_txFee_range(start, end , rangeStart, rangeEnd)
 
 
-s = slave(0,3333,1,1)
+s = slave(0,4655,1,1)
 s.start()
