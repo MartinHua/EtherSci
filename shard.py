@@ -118,6 +118,7 @@ s0.start()
 s1 = slave(1,listenPort+1,2,1)
 s1.start()
 
+
 #prepare the listening channel for slaves
 threading.Thread(target=on_new_answer, args=(listenAddr,)).start()
 time.sleep(0.2)
