@@ -20,9 +20,11 @@ updatePort = 4000
 script_dir = os.path.dirname(os.path.dirname(__file__))+'/EtherData-master/'
 
 
+
 class slave(threading.Thread):
 
     def __init__(self, sid, Port,partition,precision):
+
         self.sid = sid
         self.message = ""
         self.Port = Port
@@ -40,6 +42,7 @@ class slave(threading.Thread):
         #         temp = pickle.load(f)
         #         data.update(temp)
         #         mapping.buildMap(num, filename)
+
         # self.tree = blkSegTree(data, 4000000, precision, sid, partition)
         threading.Thread.__init__(self)
 
@@ -97,3 +100,4 @@ class slave(threading.Thread):
 
 
 s = slave(0,3333,1,1)
+s.start()
