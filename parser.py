@@ -132,6 +132,13 @@ class Parser(object):
 
 if __name__ == "__main__":
     parser = Parser()
+    b = parser.getBlock(5482503)
+    l = 0
+    for tx in b["transactions"]:
+        l += tx["gasLimit"]
+    print(l)
+    print(b["gasLimit"])
+    print(b['gasUsed'])
     # print(parser.getBlock(5000000))
     # parser = Parser(start=True, startBlock=int(sys.argv[1]), endBlock=int(sys.argv[1])+10000, fileName=int(sys.argv[1]))
     # parser = Parser(start=True, startBlock=0, endBlock=100, fileName="100")
