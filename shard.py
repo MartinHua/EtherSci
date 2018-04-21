@@ -2,8 +2,6 @@ import socket
 import threading
 
 from random import randint
-from shard_slave import slave
-from shard_master import master
 import time
 from ctypes import c_int, addressof
 import pickle
@@ -138,18 +136,20 @@ def query(start,end,offset):
 #         ans += s1.query_txFee_range(low, high, 1, 9)
 #         #s1.inorder(s1.root)
 #         print (ans)
-s0 = slave(0,listenPort,  2,1)
-s0.start()
-s1 = slave(1,listenPort+1,2,1)
-s1.start()
+if __name__ == "__main__":
+    from shard_slave import slave
+    s0 = slave(0,listenPort,  2,1)
+    s0.start()
+    s1 = slave(1,listenPort+1,2,1)
+    s1.start()
 
 
-#prepare the listening channel for slaves
-threading.Thread(target=on_new_answer, args=(listenAddr,)).start()
-time.sleep(0.2)
+    #prepare the listening channel for slaves
+    threading.Thread(target=on_new_answer, args=(listenAddr,)).start()
+    time.sleep(0.2)
 
 
-query(4000000,4000999,0)
-query(4000000,4000999,1)
-# query(2,5,1)
-#query('query_txFee_range', 4000000, 4000999)
+    query(4000000,4000999,0)
+    query(4000000,4000999,1)
+    # query(2,5,1)
+    #query('query_txFee_range', 4000000, 4000999)

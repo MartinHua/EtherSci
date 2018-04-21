@@ -5,10 +5,13 @@ import pickle
 import time
 from shard import recvAll, sendAll, msgLength
 
+slaveAddrs = [('falstaff', 4000)]
+host = socket.gethostname()
+
 
 class Updater(threading.Thread):
     def __init__(self, path='/scratch/cluster/xh3426/etherData/'):
-        threading.Thread.__init__(self)
+        threading.Thread.__init__(self, slaveAddrs)
         self.path = path
         self.parser = Parser()
         self.updating = True
@@ -23,10 +26,18 @@ class Updater(threading.Thread):
         except:
             print("fail read temp data")
 
+        self.socket = socket.socket()
+        self.s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        self.s.bind((host, randint(30000, 40000)))
+        for addr in slaveAddrs:
+            s.connect(addr)
+
     def run(self):
         while self.updating:
             block = self.parser.getBlock(self.maxBlockNum)
             if block:
+                message = pickle.dumps(block)
+                sendAll(self.s, message)
                 self.parser.saveBlock(block)
                 self.maxBlockNum += 1
                 print(self.maxBlockNum, self.maxFileNum)
@@ -44,6 +55,7 @@ class Updater(threading.Thread):
                 time.sleep(5)
         return
 
+
 if __name__ == "__main__":
     updater = Updater()
     if updater.maxBlockNum > 0:
@@ -55,6 +67,3 @@ if __name__ == "__main__":
     #     print("failed stop")
     # else:
     #     print("ok")
-
-
-
