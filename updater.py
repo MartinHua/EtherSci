@@ -3,19 +3,17 @@ import threading
 import socket
 import pickle
 import time
+from random import randint
 from shard import recvAll, sendAll, msgLength
 
-slaveAddrs = [('falstaff', 4000)]
-host = socket.gethostname()
-
-
 class Updater(threading.Thread):
-    def __init__(self, path='/scratch/cluster/xh3426/etherData/'):
-        threading.Thread.__init__(self, slaveAddrs)
+    def __init__(self, path='/scratch/cluster/xh3426/etherData/', addrs=None):
+        threading.Thread.__init__(self)
         self.path = path
         self.parser = Parser()
         self.updating = True
         self.maxBlockNum = 0
+        self.send = False
         try:
             with open(self.path + 'update.log', 'r') as f:
                 self.maxFileNum = int(f.readline())
@@ -25,39 +23,41 @@ class Updater(threading.Thread):
                 open(self.path + str(self.maxFileNum) + '.p', 'rb'))
         except:
             print("fail read temp data")
-
-        self.socket = socket.socket()
-        self.s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        self.s.bind((host, randint(30000, 40000)))
-        for addr in slaveAddrs:
-            s.connect(addr)
+        if addrs:
+            host = socket.gethostname()
+            self.send = True
+            self.s = socket.socket()
+            self.s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            self.s.bind((host, randint(30000, 40000)))
+            for addr in addrs:
+                self.s.connect(addr)
 
     def run(self):
         while self.updating:
             block = self.parser.getBlock(self.maxBlockNum)
             if block:
-                message = pickle.dumps(block)
-                sendAll(self.s, message)
+                if self.send:
+                    message = pickle.dumps(block)
+                    sendAll(self.s, message)
                 self.parser.saveBlock(block)
                 self.maxBlockNum += 1
                 print(self.maxBlockNum, self.maxFileNum)
-                if self.maxBlockNum % 10 == 0:
-                    pickle.dump(self.parser.block,
-                                open(self.path + str(self.maxFileNum) + ".p", "wb"))
-                    if self.maxBlockNum % 1000 == 0:
-                        self.parser.block = {}
-                        self.maxFileNum += 1000
-                    with open(self.path + 'update.log', 'w') as f:
-                        f.write(str(self.maxFileNum) + "\n")
-                        f.write(str(self.maxBlockNum) + "\n")
-                        f.close()
+                pickle.dump(self.parser.block, open(self.path + str(self.maxFileNum) + ".p", "wb"))
+                if self.maxBlockNum % 1000 == 0:
+                    self.parser.block = {}
+                    self.maxFileNum += 1000
+                with open(self.path + 'update.log', 'w') as f:
+                    f.write(str(self.maxFileNum) + "\n")
+                    f.write(str(self.maxBlockNum) + "\n")
+                    f.close()
             else:
                 time.sleep(5)
         return
 
 
 if __name__ == "__main__":
-    updater = Updater()
+    slaveAddrs = [('falstaff', 4000), ]
+    updater = Updater(addrs=slaveAddrs)
     if updater.maxBlockNum > 0:
         updater.start()
     # time.sleep(10)
@@ -67,3 +67,6 @@ if __name__ == "__main__":
     #     print("failed stop")
     # else:
     #     print("ok")
+
+
+
