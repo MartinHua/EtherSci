@@ -57,6 +57,7 @@ class slave(threading.Thread):
         threading.Thread.__init__(self)
 
 
+
     def run(self):
 
         self.s = socket.socket()  # Create a socket object
