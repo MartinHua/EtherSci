@@ -26,14 +26,15 @@ listenPort= randint(30000, 40000)
 masterListenPort = randint(26002, 29999)
 # masterAddr = (socket.gethostname(), masterPort)
 listenAddr = (socket.gethostname(), masterListenPort)
-host = socket.gethostname()
+num = 10
+hosts  = ["narsil-"+str(i) for i in range (3,3+num)]
 
 
 
 
 
 slavePort = randint(30000, 40000)
-slaveAddrs = [(host,3333),(host,4444)]
+slaveAddrs = [(host,5000) for host in hosts]
 #slaveAddress = ('fidelio',slavePort) #('idomeneo',slavePort)#
 masterPort = randint(26002, 29999)
 masterAddr = (socket.gethostname(), masterPort)
@@ -44,7 +45,7 @@ def on_new_answer(addr):
     listen = socket.socket()
     listen.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     listen.bind(listenAddr)
-    listen.listen(5)
+    listen.listen(12)
     while True:
         t, addre = listen.accept()
         msg = t.recv(1024)
@@ -55,7 +56,7 @@ def query(start,end):
     for addr in slaveAddrs:
         s = socket.socket()
         s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        s.bind((host, randint(30000, 40000)))
+        s.bind((socket.gethostname(), randint(30000, 40000)))
         print(addr)
         s.connect(addr)
         message = pickle.dumps(("query", start, end, listenAddr))
@@ -143,8 +144,8 @@ if __name__ == "__main__":
     if len(sys.argv) > 1:
         s = query(*(eval(s) for s in sys.argv[1:]))
 
-
-    #print ('test:', query(4000000,4000999))
+    query(4000000, 4000999)
+    #print ('test:', )
     #query(4000000,4000999)
     # query(2,5,1)
     #query('query_txFee_range', 4000000, 4000999)

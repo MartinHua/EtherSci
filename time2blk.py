@@ -20,14 +20,14 @@ class time2blk: # store block info
 
         #self.map.extend([None]*s)
         self.filledID += s
-        print ('size of map ', len(self.map))
+        #print ('size of map ', len(self.map))
         for i in range(s):
             idx =  offset + i - self.begin
             #print ("store idx ", idx, offset+i, " ts ", data[offset+i]["timestamp"] )
             self.map[idx] = data[offset+i]["timestamp"]
         f.close()
 
-        print (self.map[0], self.map[self.filledID-1])
+        #print (self.map[0], self.map[self.filledID-1])
         return
     def update(self, blk):
         self.map[self.filledID] = blk["timestamp"]

@@ -108,7 +108,7 @@ class blkSegTree(object):
         if root == None:
             return
         self.inorder(root.left)
-        print(root.start, root.end, root.txFee)
+        #print(root.start, root.end, root.txFee)
         self.inorder(root.right)
 
     def query_txFee_Max(self, i, j):

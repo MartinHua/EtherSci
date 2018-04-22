@@ -9,12 +9,12 @@ from time2blk import time2blk
 from SegTree import *
 import time
 import datetime
-from initial import recvAll, sendAll, msgLength, script_dir
+from initial import recvAll, sendAll, msgLength, script_dir,listenAddr
 
 
 
 
-sendFromPorts  = [randint(2602,29999),randint(2602,29999),randint(2602,29999),randint(2602,29999),randint(2602,29999)]
+sendFromPort  = randint(2602,29999)#[randint(2602,29999),randint(2602,29999),randint(2602,29999),randint(2602,29999),randint(2602,29999)]
 
 updatePort = randint(5000,30000)
 
@@ -22,7 +22,7 @@ updatePort = randint(5000,30000)
 # script_dir = '/scratch/cluster/xh3426/etherData/'
 # script_dir = os.path.dirname(os.path.dirname(__file__))+'/EtherData-master/'
 
-loadFileNum = 10
+loadFileNum = 20
 fileBlockNum = 1000
 toStoreTotalBlockNum = fileBlockNum*loadFileNum
 
@@ -42,8 +42,8 @@ class slave(threading.Thread):
         self.lock = threading.Lock()
         self.partition = partition
         # create a empty tree
-        self.tree = blkSegTree(self.offset, 100000) # offset (starting blk number), size of the tree
-        self.mapping = time2blk(self.offset, 100000)
+        self.tree = blkSegTree(self.offset, 150000) # offset (starting blk number), size of the tree
+        self.mapping = time2blk(self.offset, 150000)
         #self.mapping.setBegin(self.offset)
 
         for i in range(loadFileNum):
@@ -122,7 +122,7 @@ class slave(threading.Thread):
     def sendBack(self,answer,toAddr):
         s = socket.socket()
         s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        s.bind((self.host, sendFromPorts[self.sid]))
+        s.bind((self.host, sendFromPort))
         s.connect(toAddr)
         sendAll(s, pickle.dumps(("answer", answer)), msgLength)
         s.close()

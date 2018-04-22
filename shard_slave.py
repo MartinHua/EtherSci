@@ -14,7 +14,7 @@ from initial import recvAll, sendAll, msgLength, script_dir
 
 
 
-sendFromPorts  = [randint(2602,29999),randint(2602,29999),randint(2602,29999),randint(2602,29999),randint(2602,29999)]
+sendFromPorts  = [randint(2602,29999)]*10
 
 updatePort = 4000
 
@@ -151,53 +151,53 @@ class slave(threading.Thread):
         plt.ylabel('Transaction Fees')
         plt.title('Transaction Fees (per block) per day')
         plt.show()
-
-s = slave(0,randint(5000,10000),1,1)
-s.start()
-print ('test', s.query(4000000, 4000100))
-
-
-# # test--- get transactopn fees per hour for 12/07/2017
+#
+# s = slave(0,randint(5000,10000),1,1)
+# s.start()
+# print ('test', s.query(4000000, 4000100))
+#
+#
+# # # test--- get transactopn fees per hour for 12/07/2017
+# # import matplotlib.pyplot as plt
+# # import numpy as np
+# # import seaborn as sns
+# # test = [0]*24
+# # pre_b = 0
+# #
+# # for i in range(24):
+# #     t = "12/07/2017 " + str(i) + ":00"
+# #     blk = s.mapping.getBlk(t)
+# #     #print (blk)
+# #     #print (pre_b, blk)
+# #     test[i] = s.query(4000000+ pre_b, 4000000 + blk)
+# #     pre_b = blk
+# #
+# #
+# # sns.set_style("darkgrid")
+# # plt.plot(test[1:24])
+# # plt.xlabel('Hours')
+# # plt.ylabel('Transaction Fees')
+# # plt.title('Transaction Fees (per block) per hour')
+# # plt.show()
+#
 # import matplotlib.pyplot as plt
 # import numpy as np
 # import seaborn as sns
-# test = [0]*24
+# test = [0] * 31
 # pre_b = 0
 #
-# for i in range(24):
-#     t = "12/07/2017 " + str(i) + ":00"
+# for i in range(1, 31):
+#     t = str(i) + "/07/2017 00:00"
 #     blk = s.mapping.getBlk(t)
-#     #print (blk)
-#     #print (pre_b, blk)
-#     test[i] = s.query(4000000+ pre_b, 4000000 + blk)
+#     # print (blk)
+#     # print (pre_b, blk)
+#     test[i] = s.query(4000000 + pre_b, 4000000 + blk)
 #     pre_b = blk
 #
-#
 # sns.set_style("darkgrid")
-# plt.plot(test[1:24])
-# plt.xlabel('Hours')
+# plt.plot(test[1:30])
+# plt.xlabel('days')
 # plt.ylabel('Transaction Fees')
-# plt.title('Transaction Fees (per block) per hour')
+# plt.title('Transaction Fees (per block) per day')
 # plt.show()
-
-import matplotlib.pyplot as plt
-import numpy as np
-import seaborn as sns
-test = [0] * 31
-pre_b = 0
-
-for i in range(1, 31):
-    t = str(i) + "/07/2017 00:00"
-    blk = s.mapping.getBlk(t)
-    # print (blk)
-    # print (pre_b, blk)
-    test[i] = s.query(4000000 + pre_b, 4000000 + blk)
-    pre_b = blk
-
-sns.set_style("darkgrid")
-plt.plot(test[1:30])
-plt.xlabel('days')
-plt.ylabel('Transaction Fees')
-plt.title('Transaction Fees (per block) per day')
-plt.show()
 

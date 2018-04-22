@@ -1,7 +1,12 @@
 
 import io
 import pickle
+import socket
+from random import randint
 
+masterListenPort = randint(26002, 29999)
+# masterAddr = (socket.gethostname(), masterPort)
+listenAddr = (socket.gethostname(), masterListenPort)
 
 
 script_dir = '/scratch/cluster/xh3426/etherData/'
