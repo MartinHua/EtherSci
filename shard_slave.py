@@ -9,7 +9,7 @@ from time2blk import time2blk
 from SegTree import *
 import time
 import datetime
-from initial import recvAll, sendAll, msgLength, script_dir
+from shard import recvAll, sendAll, msgLength
 
 
 
@@ -19,7 +19,7 @@ sendFromPorts  = [randint(2602,29999)]*10
 updatePort = 4000
 
 
-# script_dir = os.path.dirname(os.path.dirname(__file__))+'/EtherData-master/'
+script_dir = os.path.dirname(os.path.dirname(__file__))+'/EtherData-master/'
 
 loadFileNum = 1
 fileBlockNum = 1000
@@ -110,12 +110,17 @@ class slave(threading.Thread):
 
     def on_update_block(self,package):
         while True:
+            print ('update')
             rawblk = recvAll(package)
             blk = pickle.load(io.BytesIO(rawblk))
+
             self.tree.update(blk)
+
             self.mapping.update(blk)
-            self.draw()
-            print(blk)
+
+            self.draw_min()
+
+            #print(blk)
 
 
     def sendBack(self,answer,toAddr):
@@ -126,78 +131,120 @@ class slave(threading.Thread):
         sendAll(s, pickle.dumps(("answer", answer)), msgLength)
         return 0
 
-    def query(self,start,end,rangeStart=1,rangeEnd=5):
+    def query(self,startTime,endTime):
         #return self.tree.query_txFee_range(start, end , rangeStart, rangeEnd)
-        return self.tree.query_txFee_Sum(start, end)
+        start = int(self.mapping.getBlk(startTime) / self.partition)
+        end = int(self.mapping.getBlk(endTime) / self.partition)
+        return self.tree.query_txFee_Sum(self.begin +start, self.begin +end)
 
-    def draw(self):
+    def draw_day(self):
         import matplotlib.pyplot as plt
-        import numpy as np
+        import numpy as np50
         import seaborn as sns
         test = [0] * 31
         pre_b = 0
-
-        for i in range(1, 31):
+        print('-----------------------------------------------------------')
+        for i in range(1, 20):
             t = str(i) + "/07/2017 00:00"
             blk = self.mapping.getBlk(t)
             # print (blk)
             # print (pre_b, blk)
             test[i] = self.query(4000000 + pre_b, 4000000 + blk)
             pre_b = blk
-
+            print(test[i], 'query from', 4000000 + pre_b, ' to ', 4000000 + blk)
+        print('-----------------------------------------------------------')
         sns.set_style("darkgrid")
-        plt.plot(test[1:30])
+        plt.plot(test[2:])
         plt.xlabel('days')
         plt.ylabel('Transaction Fees')
         plt.title('Transaction Fees (per block) per day')
         plt.show()
-#
-# s = slave(0,randint(5000,10000),1,1)
-# s.start()
-# print ('test', s.query(4000000, 4000100))
-#
-#
-# # # test--- get transactopn fees per hour for 12/07/2017
-# # import matplotlib.pyplot as plt
-# # import numpy as np
-# # import seaborn as sns
-# # test = [0]*24
-# # pre_b = 0
-# #
-# # for i in range(24):
-# #     t = "12/07/2017 " + str(i) + ":00"
-# #     blk = s.mapping.getBlk(t)
-# #     #print (blk)
-# #     #print (pre_b, blk)
-# #     test[i] = s.query(4000000+ pre_b, 4000000 + blk)
-# #     pre_b = blk
-# #
-# #
-# # sns.set_style("darkgrid")
-# # plt.plot(test[1:24])
-# # plt.xlabel('Hours')
-# # plt.ylabel('Transaction Fees')
-# # plt.title('Transaction Fees (per block) per hour')
-# # plt.show()
+    def draw_hr(self):
+
+        # test--- get transactopn fees per hour for 12/07/2017
+        import matplotlib.pyplot as plt
+        import numpy as np
+        import seaborn as sns
+        test = [0]*24
+        pre_b = 0
+
+        for i in range(1, 24):
+            t = "16/07/2017 " + str(i) +':00'
+            blk = self.mapping.getBlk(t)
+
+            print (pre_b, blk)
+            test[i] = (self.query(4000000 + pre_b, 4000000 + blk)) / 10 ** 9
+            pre_b = blk
+
+        print (' [draw] ', test[2:])
+        sns.set_style("darkgrid")
+        plt.plot(test[2:])
+        plt.xlabel('Hours')
+        plt.ylabel('Transaction Fees')
+        plt.title('Transaction Fees (per block) per hour')
+        plt.show()
+    def draw_min(self):
+
+        # test--- get transactopn fees per hour for 12/07/2017
+        import matplotlib.pyplot as plt
+        import numpy as np
+        import seaborn as sns
+        test = [0]*60
+        pre_b = 0
+
+        for i in range(1,60):
+            t = "16/07/2017 6:" + str(i)
+            blk = self.mapping.getBlk(t)
+
+            print (pre_b, blk)
+            test[i] = (self.query(4000000 + pre_b, 4000000 + blk)) / 10 ** 9
+            pre_b = blk
+
+        print (' [draw] ', test[2:])
+        sns.set_style("darkgrid")
+        plt.plot(test[2:])
+        plt.xlabel('Hours')
+        plt.ylabel('Transaction Fees')
+        plt.title('Transaction Fees (per block) per hour')
+        plt.show()
+
+s = slave(0,randint(5000,10000),2,1)
+s.start()
+
+month = 7
+year = 2017
+list = [0] * 30
+pre_t = "1/" + str(month) + "/" + str(year) + " 00:00"
+for i in range(2, 30):
+    t = str(i) + "/" + str(month) + "/" + str(year) + " 00:00"
+
+    list[i] = s.query(pre_t, t)
+    pre_t = t
+from draw import *
+draw(list[1:])
+
 #
 # import matplotlib.pyplot as plt
-# import numpy as np
+# import numpy as np50
 # import seaborn as sns
-# test = [0] * 31
+# test = [0] * 60
 # pre_b = 0
 #
-# for i in range(1, 31):
-#     t = str(i) + "/07/2017 00:00"
+# for i in range(1, 60):
+#     t = "16/07/2017 6:" + str(i)
 #     blk = s.mapping.getBlk(t)
 #     # print (blk)
 #     # print (pre_b, blk)
 #     test[i] = s.query(4000000 + pre_b, 4000000 + blk)
+#     print(test[i], 'query from', 4000000 + pre_b, ' to ', 4000000 + blk)
 #     pre_b = blk
 #
 # sns.set_style("darkgrid")
-# plt.plot(test[1:30])
+# plt.plot(test[2:])
 # plt.xlabel('days')
 # plt.ylabel('Transaction Fees')
 # plt.title('Transaction Fees (per block) per day')
 # plt.show()
+
+
 

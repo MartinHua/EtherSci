@@ -16,6 +16,7 @@ class blkNode:  # store block info
         n = int(10 / self.precision)
         self.rangeTx = [0] * n
         self.numTx = 0
+        self.topAddr = [None]*5
         if blk is not None:
             self.txFee = blk["txFee"]
             for i in range(n):
@@ -35,6 +36,7 @@ class blkNode:  # store block info
 
 
 
+
 class blkSegTree(object):
 
     def __init__(self, offset, size):
@@ -42,6 +44,9 @@ class blkSegTree(object):
         self.filledID = offset
         self.precision = 1
         self.size = size
+        # below are variables for top addr
+        self.addrMap = dict() # key hash : easyKey
+
         def getNode(start, end, blks, precision):
             index = self.id + self.offset + self.partition * (start - self.offset)
             # print ('[debug] index: ', index, blks[index]["txFee"])
@@ -78,6 +83,25 @@ class blkSegTree(object):
     def update(self, blk):
 
         # update the whole path
+        def findTopAddr(blk):
+            addrCount = dict()
+            for tx in blk['transactions']:
+                if tx['from'] not in self.addrMap:
+                    self.addrMap[tx['from']] = len(self.addrMap)
+                if self.addrMap[tx['from']] not in addrCount:
+                    addrCount[self.addrMap[tx['from']]] = 1
+                else:
+                    addrCount[self.addrMap[tx['from']]] += 1
+            res = dict()
+            count = 0
+            addrCount_sort = [(k, addrCount[k]) for k in sorted(addrCount, key=addrCount.get, reverse=True)]
+            for key, value in addrCount_sort:
+                if count < 5:
+                    res[key] = value
+                    count += 1
+                else:
+                    break
+            return res
 
         def updateHelper(blk, node):
 
@@ -90,7 +114,7 @@ class blkSegTree(object):
                     node.rangeTx[i] = node.countRange(0.0001 * i * self.precision, 0.0001 * (i + 1) * self.precision, blk)
                 #print(node.rangeTx)
                 node.numTx = len(blk['transactions'])
-
+                node.topAddr = findTopAddr(blk)
                 return
             mid = int(node.start + (node.end - node.start) / 2)
             if self.filledID < mid:
@@ -100,6 +124,7 @@ class blkSegTree(object):
             node.txFee = node.left.txFee + node.right.txFee
             node.numTx = node.left.numTx + node.right.numTx
             node.rangeTx = [x + y for x, y in zip(node.left.rangeTx, node.right.rangeTx)]
+            node.topAddr = Counter(node.left.topAddr) + Counter(node.right.topAddr)
         #print ('put in ', self.filledID)
         updateHelper(blk, self.root)
         self.filledID += 1

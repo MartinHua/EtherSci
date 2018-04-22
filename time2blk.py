@@ -13,6 +13,7 @@ class time2blk: # store block info
         self.size = size
         self.filledID = 0
 
+
     def buildMap(self, offset, filename):
         with open(script_dir + filename, 'rb') as f:
             data = pickle.load(f)
@@ -20,16 +21,17 @@ class time2blk: # store block info
 
         #self.map.extend([None]*s)
         self.filledID += s
-        #print ('size of map ', len(self.map))
+        print ('size of map ', len(self.map))
         for i in range(s):
             idx =  offset + i - self.begin
             #print ("store idx ", idx, offset+i, " ts ", data[offset+i]["timestamp"] )
             self.map[idx] = data[offset+i]["timestamp"]
         f.close()
 
-        #print (self.map[0], self.map[self.filledID-1])
+        print (self.map[0], self.map[self.filledID-1])
         return
     def update(self, blk):
+        print()
         self.map[self.filledID] = blk["timestamp"]
         self.filledID += 1
     def getBlk(self, t):
@@ -39,14 +41,15 @@ class time2blk: # store block info
         timestamp_int= int(timestamp)
 
         chk = timestamp_int
-        if chk > self.map[self.filledID-1] or chk < self.map[0]:
 
-            print ('!!!error query. exceed boundary')
-            print ('Query ts is', chk, ', start from', self.map[0], '; end to:',  self.map[self.filledID-1])
-            if chk > self.map[self.filledID-1]:
-                return self.size - 1
-            return 0
-        res = self.binarySearch(0, self.size-1, chk)
+        if chk > self.map[self.filledID-1] or chk < self.map[0]:
+            print('try to get', chk, 'current limit', self.filledID, self.map[self.filledID - 1])
+            #print ('!!!error query. exceed boundary')
+            #print ('Query ts is', chk, ', start from', self.map[0], '; end to:',  self.map[self.filledID-1])
+            #if chk > self.map[self.filledID-1]:
+            #    return self.filledID - 1
+            return self.size-1
+        res = self.binarySearch(0, self.filledID-1, chk)
         return res
     def binarySearch( self,l, r, x):
 
