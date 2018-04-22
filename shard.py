@@ -47,7 +47,8 @@ def sendAll(socket, data, length=msgLength):
 
 
 slavePort = randint(30000, 40000)
-slaveAddress = ('fidelio',slavePort) #('idomeneo',slavePort)#
+slaveAddrs = [(host,3333),(host,4444)]
+#slaveAddress = ('fidelio',slavePort) #('idomeneo',slavePort)#
 masterPort = randint(26002, 29999)
 masterAddr = (socket.gethostname(), masterPort)
 listenAddr = (socket.gethostname(), masterPort-1)
@@ -63,13 +64,17 @@ def on_new_answer(addr):
         msg = t.recv(1024)
         print(pickle.loads(msg))
 
-def query(start,end,offset):
-    s = socket.socket()
-    s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    s.bind((host, randint(30000, 40000)))
-    s.connect((host, listenPort+offset))
-    message = pickle.dumps(("query", start, end,listenAddr))
-    s.sendall(message)
+def query(start,end):
+
+    for addr in slaveAddrs:
+        s = socket.socket()
+        s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        s.bind((host, randint(30000, 40000)))
+        print(addr)
+        s.connect(addr)
+        message = pickle.dumps(("query", start, end, listenAddr))
+        s.sendall(message)
+
 
 #
 # #start a new slave
@@ -140,19 +145,20 @@ def query(start,end,offset):
 #         #s1.inorder(s1.root)
 #         print (ans)
 if __name__ == "__main__":
-    from shard_slave import slave
-    s0 = slave(0,listenPort,  2)
-    s0.start()
-    #s1 = slave(1,listenPort+1,2)
-    #s1.start()
-
+    # from shard_slave import slave
+    # s0 = slave(0,listenPort,  2,1)
+    # s0.start()
+    # s1 = slave(1,listenPort+1,2,1)
+    # s1.start()
 
     #prepare the listening channel for slaves
     threading.Thread(target=on_new_answer, args=(listenAddr,)).start()
     time.sleep(0.2)
+    if len(sys.argv) > 1:
+        s = query(*(eval(s) for s in sys.argv[1:]))
 
 
-    print ('test:', query(4000000,4000999,0))
-    #query(4000000,4000999,1)
+    #print ('test:', query(4000000,4000999))
+    #query(4000000,4000999)
     # query(2,5,1)
     #query('query_txFee_range', 4000000, 4000999)
