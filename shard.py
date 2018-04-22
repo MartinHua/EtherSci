@@ -17,6 +17,9 @@ import numpy as np
 import seaborn as sns
 from time2blk import time2blk
 from SegTree import *
+from initial import script_dir
+
+
 
 listenPort= randint(30000, 40000)
 # slaveAddress = ('fidelio',slavePort) #('idomeneo',slavePort)#
@@ -26,24 +29,7 @@ listenAddr = (socket.gethostname(), masterListenPort)
 host = socket.gethostname()
 
 
-msgLength = 1024
-def recvAll(socket, length=msgLength):
-    data = b''
-    while True:
-        packet = socket.recv(length)
-        data += packet
-        try:
-            pickle.load(io.BytesIO(data))
-            return data
-        except:
-            continue
 
-def sendAll(socket, data, length=msgLength):
-    cnt = length
-    while cnt < len(data):
-        socket.sendall(data[(cnt - length): cnt])
-        cnt += length
-    socket.sendall(data[(cnt - length): len(data)])
 
 
 slavePort = randint(30000, 40000)

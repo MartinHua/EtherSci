@@ -9,8 +9,7 @@ from time2blk import time2blk
 from SegTree import *
 import time
 import datetime
-from shard import recvAll, sendAll, msgLength
-
+from initial import recvAll, sendAll, msgLength, script_dir
 
 
 
@@ -20,8 +19,8 @@ sendFromPorts  = [randint(2602,29999),randint(2602,29999),randint(2602,29999),ra
 updatePort = randint(5000,30000)
 
 
-script_dir = '/scratch/cluster/xh3426/etherData/'
-script_dir = os.path.dirname(os.path.dirname(__file__))+'/EtherData-master/'
+# script_dir = '/scratch/cluster/xh3426/etherData/'
+# script_dir = os.path.dirname(os.path.dirname(__file__))+'/EtherData-master/'
 
 loadFileNum = 10
 fileBlockNum = 1000

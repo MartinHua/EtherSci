@@ -32,12 +32,12 @@ class Parser(object):
     Get the data from a particular block:
         block = parser.getBlock(block_number)
     """
-
+    # narsil-1
     def __init__(
         self,
         start=False,
         rpc_port=8545,
-        host="http://128.83.144.143",
+        host="http://128.83.144.125",
         delay=0.0001,
         startBlock = None,
         endBlock = None,

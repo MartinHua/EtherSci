@@ -9,14 +9,14 @@ from time2blk import time2blk
 from SegTree import *
 import time
 import datetime
-from shard import recvAll, sendAll, msgLength
+from initial import recvAll, sendAll, msgLength, script_dir
 
 
-
+# script_dir = os.path.dirname(os.path.dirname(__file__))+'/EtherData-master/'
 
 
 updatePort = 4000
-script_dir = os.path.dirname(os.path.dirname(__file__))+'/EtherData-master/'
+
 host = socket.gethostname()
 sendToAddr = (host, updatePort)
 offset = 4000000
