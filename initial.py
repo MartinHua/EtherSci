@@ -40,3 +40,6 @@ def sendAll(socket, data, length=msgLength):
         socket.sendall(data[(cnt - length): cnt])
         cnt += length
     socket.sendall(data[(cnt - length): len(data)])
+
+
+dect ={"x":1}

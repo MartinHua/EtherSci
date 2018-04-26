@@ -56,7 +56,10 @@ class slave(threading.Thread):
         index = self.sid + self.offset + idx * self.partition
         # print (idx, index, self.offset)
         # print (index, blks[index])
-        return blks[index]
+        try:
+            return blks[index]
+        except:
+            return None
 
 
     def run(self):

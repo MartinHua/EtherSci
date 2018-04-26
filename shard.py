@@ -6,7 +6,7 @@ import sys
 import pickle
 import time
 from initial import script_dir, slaveAddrs
-
+from updater import updater
 
 
 listenAddr = (socket.gethostname(), randint(30000, 40000))

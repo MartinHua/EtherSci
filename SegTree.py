@@ -131,8 +131,9 @@ class blkSegTree(object):
                 mergeNode(node)
 
         #print ('put in ', self.filledID)
-        updateHelper(blk, self.root)
-        self.filledID += 1
+        if blk:
+            updateHelper(blk, self.root)
+            self.filledID += 1
         #assert (self.filledID <= self.offset + self.size)
     def inorder(self, root):
         if root == None:
