@@ -9,7 +9,7 @@ from time2blk import time2blk
 from SegTree import *
 import time
 import datetime
-from initial import recvAll, sendAll, msgLength, script_dir, listenAddr, updatePort
+from initial import recvAll, sendAll, msgLength, script_dir, masterListenFromSlaveAddr, updatePort
 
 
 sendFromPort = randint(2602, 29999)
@@ -52,6 +52,12 @@ class slave(threading.Thread):
         threading.Thread.__init__(self)
         threading.Thread(target=self.listen_new_block, args=()).start()
 
+        self.sendToMasterSocket = socket.socket()
+        self.sendToMasterSocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        self.sendToMasterSocket.bind((self.host, sendFromPort))
+        self.sendToMasterSocket.connect(masterListenFromSlaveAddr)
+
+
     def getBlock(self, blks, idx):
         index = self.sid + self.offset + idx * self.partition
         # print (idx, index, self.offset)
@@ -82,7 +88,7 @@ class slave(threading.Thread):
                         entry = pickle.load(file)
                         if entry[0] == "query":
                             answer = self.query(entry[1], entry[2])
-                            self.sendBack(answer, entry[3])
+                            self.sendBack(answer)
                     except EOFError:
                         break
 
@@ -104,12 +110,8 @@ class slave(threading.Thread):
             self.mapping.update(blk)
             print(blk["blockNum"])
 
-    def sendBack(self, answer, toAddr):
-        s = socket.socket()
-        s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        s.bind((self.host, sendFromPort))
-        s.connect(toAddr)
-        sendAll(s, pickle.dumps(("answer", answer)), msgLength)
+    def sendBack(self, answer):
+        sendAll(self.sendToMasterSocket, pickle.dumps(("answer", answer)), msgLength)
         s.close()
         return 0
 
