@@ -5,21 +5,21 @@ import socket
 import os
 from random import randint
 
-masterListenPort = randint(26002, 29999)
-# masterAddr = (socket.gethostname(), masterPort)
-listenAddr = (socket.gethostname(), masterListenPort)
-
+# masterListenPort = randint(26002, 29999)
+# # masterAddr = (socket.gethostname(), masterPort)
+# listenAddr = (socket.gethostname(), masterListenPort)
+#
 
 slave_num = 10
 slaveHosts = ["narsil-"+str(i) for i in range(3, 3+slave_num)]
 
-queryPort = 5000
+queryPort = 6000
 slaveAddrs = [(host, queryPort) for host in slaveHosts]
 
-updatePort = 3000
+updatePort = 7000
 slaveUpdateAddrs = [(host, updatePort) for host in slaveHosts]
 
-masterListenFromSlaveAddr = (socket.gethostname(), randint(30000, 40000))
+masterListenFromSlaveAddr = ('peanut-head-bug', 30640)
 
 
 script_dir = '/scratch/cluster/xh3426/etherData/'
@@ -43,5 +43,3 @@ def sendAll(socket, data, length=msgLength):
         cnt += length
     socket.sendall(data[(cnt - length): len(data)])
 
-
-dect ={"x":1}

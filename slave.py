@@ -30,6 +30,13 @@ class slave(threading.Thread):
 
         self.offset = 4000000
         self.host = socket.gethostname()
+
+        self.sendToMasterSocket = socket.socket()
+        self.sendToMasterSocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        self.sendToMasterSocket.bind((self.host, sendFromPort))
+        print(masterListenFromSlaveAddr)
+        self.sendToMasterSocket.connect(masterListenFromSlaveAddr)
+
         self.lock = threading.Lock()
         self.partition = partition
         # create a empty tree
@@ -37,6 +44,7 @@ class slave(threading.Thread):
         # offset (starting blk number), size of the tree
         self.mapping = time2blk(self.offset, 150000)
         # self.mapping.setBegin(self.offset)
+
 
         for i in range(loadFileNum):
             filename = str(self.offset) + '.p'
@@ -52,10 +60,7 @@ class slave(threading.Thread):
         threading.Thread.__init__(self)
         threading.Thread(target=self.listen_new_block, args=()).start()
 
-        self.sendToMasterSocket = socket.socket()
-        self.sendToMasterSocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        self.sendToMasterSocket.bind((self.host, sendFromPort))
-        self.sendToMasterSocket.connect(masterListenFromSlaveAddr)
+
 
 
     def getBlock(self, blks, idx):

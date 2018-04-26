@@ -1,12 +1,17 @@
 import socket
 import threading
 import os
+import io
 from random import randint
 import sys
 import pickle
 import time
-from initial import script_dir, slaveAddrs, masterListenFromSlaveAddr
+from initial import script_dir, slaveAddrs, masterListenFromSlaveAddr, recvAll, msgLength
 
+
+
+
+queryNum = 0
 
 def listen_answer():
     listen = socket.socket()
@@ -15,17 +20,22 @@ def listen_answer():
     listen.listen(12)
     while True:
         t, addr = listen.accept()
-        threading.Thread(target=listen_answer, args=(t,)).start()
+        threading.Thread(target=on_new_answer, args=(t,)).start()
 
 
-
-
-def on_new_answer(t):
-    msg = t.recv(1024)
-    print(pickle.loads(msg))
+def on_new_answer(command):
+    while True:
+        msg = recvAll(command, msgLength)
+        if (msg != b''):
+            file = io.BytesIO(msg)
+            while True:
+                try:
+                    entry = pickle.load(file)
+                    print(entry)
+                except EOFError:
+                    break
 
 def query(start,end):
-
     for addr in slaveAddrs:
         s = socket.socket()
         s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -33,6 +43,7 @@ def query(start,end):
         s.connect(addr)
         message = pickle.dumps(("query", start, end))
         s.sendall(message)
+    # queryNum += 1
 
 
 if __name__ == "__main__":
