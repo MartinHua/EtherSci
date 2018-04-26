@@ -4,7 +4,7 @@ import socket
 import pickle
 import time
 from random import randint
-from initial import recvAll, sendAll, msgLength
+from initial import recvAll, sendAll, msgLength,slaveAddrs
 
 class Updater(threading.Thread):
     def __init__(self, path='/scratch/cluster/xh3426/etherData/', addrs=None):
@@ -63,8 +63,8 @@ class Updater(threading.Thread):
 
 
 if __name__ == "__main__":
-    slaveAddrs = [('idomeneo', 4000), ]
-    updater = Updater(addrs=None)
+    #slaveAddrs = [('idomeneo', 4000), ]
+    updater = Updater(addrs=slaveAddrs)
     if updater.maxBlockNum > 0:
         updater.start()
     # time.sleep(10)

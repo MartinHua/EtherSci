@@ -17,7 +17,7 @@ import numpy as np
 import seaborn as sns
 from time2blk import time2blk
 from SegTree import *
-from initial import script_dir
+from initial import script_dir,slaveAddrs
 
 
 
@@ -26,16 +26,10 @@ listenPort= randint(30000, 40000)
 masterListenPort = randint(26002, 29999)
 # masterAddr = (socket.gethostname(), masterPort)
 listenAddr = (socket.gethostname(), masterListenPort)
-num = 10
-hosts  = ["narsil-"+str(i) for i in range (3,3+num)]
 
 
 
 
-
-slavePort = randint(30000, 40000)
-slaveAddrs = [(host,5000) for host in hosts]
-#slaveAddress = ('fidelio',slavePort) #('idomeneo',slavePort)#
 masterPort = randint(26002, 29999)
 masterAddr = (socket.gethostname(), masterPort)
 listenAddr = (socket.gethostname(), masterPort-1)
