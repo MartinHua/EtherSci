@@ -8,17 +8,21 @@ import time
 from initial import script_dir, slaveAddrs, masterListenFromSlaveAddr
 
 
-
-
-def on_new_answer():
+def listen_answer():
     listen = socket.socket()
     listen.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     listen.bind(masterListenFromSlaveAddr)
     listen.listen(12)
     while True:
-        t, addre = listen.accept()
-        msg = t.recv(1024)
-        print(pickle.loads(msg))
+        t, addr = listen.accept()
+        threading.Thread(target=listen_answer, args=(t,)).start()
+
+
+
+
+def on_new_answer(t):
+    msg = t.recv(1024)
+    print(pickle.loads(msg))
 
 def query(start,end):
 
@@ -32,7 +36,7 @@ def query(start,end):
 
 
 if __name__ == "__main__":
-    threading.Thread(target=on_new_answer, args=()).start()
+    threading.Thread(target=listen_answer, args=()).start()
     time.sleep(0.1)
     os.system('bash slave.sh xh3426 10')
     time.sleep(20)
