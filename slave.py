@@ -112,7 +112,6 @@ class slave(threading.Thread):
 
     def sendBack(self, answer):
         sendAll(self.sendToMasterSocket, pickle.dumps(("answer", answer)), msgLength)
-        s.close()
         return 0
 
     def query(self, start, end, rangeStart=1, rangeEnd=5):
