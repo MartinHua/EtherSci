@@ -9,7 +9,7 @@ from time2blk import time2blk
 from SegTree import *
 import time
 import datetime
-from shard import recvAll, sendAll, msgLength
+from initial import recvAll, sendAll, msgLength
 
 
 
@@ -21,7 +21,7 @@ updatePort = 4000
 
 script_dir = os.path.dirname(os.path.dirname(__file__))+'/EtherData-master/'
 
-loadFileNum = 1
+loadFileNum = 30
 fileBlockNum = 1000
 toStoreTotalBlockNum = fileBlockNum*loadFileNum
 
@@ -43,7 +43,7 @@ class slave(threading.Thread):
         self.tree = blkSegTree(self.offset, 100000) # offset (starting blk number), size of the tree
         self.mapping = time2blk(self.offset, 100000)
         #self.mapping.setBegin(self.offset)
-
+        self.begin = 4000000
         for i in range(loadFileNum):
 
             filename = str(self.offset) + '.p'
@@ -131,11 +131,12 @@ class slave(threading.Thread):
         sendAll(s, pickle.dumps(("answer", answer)), msgLength)
         return 0
 
-    def query(self,startTime,endTime):
+    def query(self,startTime, endTime):
         #return self.tree.query_txFee_range(start, end , rangeStart, rangeEnd)
         start = int(self.mapping.getBlk(startTime) / self.partition)
         end = int(self.mapping.getBlk(endTime) / self.partition)
-        return self.tree.query_txFee_Sum(self.begin +start, self.begin +end)
+        #return self.tree.query_txFee_Sum(self.begin + start, self.begin + end)
+        return self.tree.query_topK_addrs(self.begin + start, self.begin + end)
 
     def draw_day(self):
         import matplotlib.pyplot as plt
@@ -221,23 +222,22 @@ for i in range(2, 30):
     list[i] = s.query(pre_t, t)
     pre_t = t
 from draw import *
-draw(list[1:])
+print (list)
+#draw(list[1:])
 
-#
+# #
 # import matplotlib.pyplot as plt
 # import numpy as np50
 # import seaborn as sns
 # test = [0] * 60
-# pre_b = 0
+# pre_t = 0
 #
 # for i in range(1, 60):
 #     t = "16/07/2017 6:" + str(i)
-#     blk = s.mapping.getBlk(t)
-#     # print (blk)
-#     # print (pre_b, blk)
-#     test[i] = s.query(4000000 + pre_b, 4000000 + blk)
+#
+#     test[i] = s.query( pre_t,  t)
 #     print(test[i], 'query from', 4000000 + pre_b, ' to ', 4000000 + blk)
-#     pre_b = blk
+#     pre_t = t
 #
 # sns.set_style("darkgrid")
 # plt.plot(test[2:])

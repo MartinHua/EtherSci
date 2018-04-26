@@ -3,13 +3,13 @@ import io
 import pickle
 import socket
 from random import randint
-
+from collections import Counter
 masterListenPort = randint(26002, 29999)
 # masterAddr = (socket.gethostname(), masterPort)
 listenAddr = (socket.gethostname(), masterListenPort)
 
 
-script_dir = '/scratch/cluster/xh3426/etherData/'
+#script_dir = '/scratch/cluster/xh3426/etherData/'
 
 msgLength = 1024
 def recvAll(socket, length=msgLength):

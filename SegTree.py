@@ -1,3 +1,5 @@
+topK = 5
+from collections import Counter
 class blkNode:  # store block info
     def __init__(self, start, end, precision, blk=None):
         # self.blockNum = blk["blockNum"]
@@ -16,7 +18,7 @@ class blkNode:  # store block info
         n = int(10 / self.precision)
         self.rangeTx = [0] * n
         self.numTx = 0
-        self.topAddr = [None]*5
+        self.topAddrs = dict()
         if blk is not None:
             self.txFee = blk["txFee"]
             for i in range(n):
@@ -44,8 +46,8 @@ class blkSegTree(object):
         self.filledID = offset
         self.precision = 1
         self.size = size
-        # below are variables for top addr
-        self.addrMap = dict() # key hash : easyKey
+        # below are variables for top addrs
+
 
         def getNode(start, end, blks, precision):
             index = self.id + self.offset + self.partition * (start - self.offset)
@@ -81,50 +83,53 @@ class blkSegTree(object):
         return rangeHelper(i, j + 1, self.root)
 
     def update(self, blk):
-
+        def getKey(hash):
+            return hash
         # update the whole path
-        def findTopAddr(blk):
+        def updateTopAddrs(blk):
             addrCount = dict()
             for tx in blk['transactions']:
-                if tx['from'] not in self.addrMap:
-                    self.addrMap[tx['from']] = len(self.addrMap)
-                if self.addrMap[tx['from']] not in addrCount:
-                    addrCount[self.addrMap[tx['from']]] = 1
+                key = getKey(tx['from'])
+                if key not in addrCount:
+                    addrCount[key] = 1
                 else:
-                    addrCount[self.addrMap[tx['from']]] += 1
+                    addrCount[key] += 1
+            topKList = Counter(addrCount).most_common(topK)
             res = dict()
-            count = 0
-            addrCount_sort = [(k, addrCount[k]) for k in sorted(addrCount, key=addrCount.get, reverse=True)]
-            for key, value in addrCount_sort:
-                if count < 5:
-                    res[key] = value
-                    count += 1
-                else:
-                    break
+            for i in range(min(topK, len(addrCount))):
+                res[topKList[i][0]] = topKList[i][1]
             return res
+        def updateNode(node, blk):
+            node.txFee = blk["txFee"]
+            n = int(10 / self.precision)
+            node.rangeTx = [0] * n
+            for i in range(n):
+                node.rangeTx[i] = node.countRange(0.0001 * i * self.precision, 0.0001 * (i + 1) * self.precision, blk)
+            node.numTx = len(blk['transactions'])
+            node.topAddrs = updateTopAddrs(blk)
 
-        def updateHelper(blk, node):
-
-            if node.start == self.filledID and node.end == self.filledID + 1:
-                node.txFee = blk["txFee"]
-                n = int(10 / self.precision)
-                node.rangeTx = [0] * n
-
-                for i in range(n):
-                    node.rangeTx[i] = node.countRange(0.0001 * i * self.precision, 0.0001 * (i + 1) * self.precision, blk)
-                #print(node.rangeTx)
-                node.numTx = len(blk['transactions'])
-                node.topAddr = findTopAddr(blk)
-                return
-            mid = int(node.start + (node.end - node.start) / 2)
-            if self.filledID < mid:
-                updateHelper( blk, node.left)
-            else:
-                updateHelper(blk, node.right)
+        def mergeNode(node):
             node.txFee = node.left.txFee + node.right.txFee
             node.numTx = node.left.numTx + node.right.numTx
             node.rangeTx = [x + y for x, y in zip(node.left.rangeTx, node.right.rangeTx)]
-            node.topAddr = Counter(node.left.topAddr) + Counter(node.right.topAddr)
+            tempList = Counter(node.left.topAddrs) + Counter(node.right.topAddrs)
+            topKList = Counter(tempList).most_common(topK)
+            for i in range(min(topK, len(tempList))):
+                node.topAddrs[topKList[i][0]] = topKList[i][1]
+
+
+        def updateHelper(blk, node):
+
+                if node.start == self.filledID and node.end == self.filledID + 1:
+                    updateNode(node, blk)
+                    return
+                mid = int(node.start + (node.end - node.start) / 2)
+                if self.filledID < mid:
+                    updateHelper( blk, node.left)
+                else:
+                    updateHelper(blk, node.right)
+                mergeNode(node)
+
         #print ('put in ', self.filledID)
         updateHelper(blk, self.root)
         self.filledID += 1
@@ -133,7 +138,7 @@ class blkSegTree(object):
         if root == None:
             return
         self.inorder(root.left)
-        #print(root.start, root.end, root.txFee)
+        print(root.start, root.end, root.txFee)
         self.inorder(root.right)
 
     def query_txFee_Max(self, i, j):
@@ -161,7 +166,24 @@ class blkSegTree(object):
             return rangeHelper(i, min(j, mid), node.left) + rangeHelper(max(i, mid), j, node.right)
 
         return rangeHelper(i, j + 1, self.root)
+    def query_topK_addrs(self, i, j):
 
+        def rangeHelper(i, j, node):
+            # return covered sum
+            if node == None or i >= node.end or j <= node.start:
+                return
+            if i == node.start and j == node.end:
+                return node.topAddrs
+            mid = int(node.start + (node.end - node.start) / 2)
+            leftTopK =  rangeHelper(i, min(j, mid), node.left)
+            rightTopK = rangeHelper(max(i, mid), j, node.right)
+            tempList = Counter(leftTopK) + Counter(rightTopK)
+            topKList = Counter(tempList).most_common(topK)
+            currTopK = dict()
+            for i in range(min(topK, len(tempList))):
+                currTopK[topKList[i][0]] = topKList[i][1]
+            return currTopK
+        return rangeHelper(i, j + 1, self.root)
     def query_txFee_range(self, i, j, low, up):
 
         def rangeHelper(i, j, node):
@@ -170,18 +192,16 @@ class blkSegTree(object):
                 return 0
             if i == node.start and j == node.end:
                 count = 0
-
                 for x in range(low, up):
-
                     count += node.rangeTx[x]
-
                 return count
             mid = int(node.start + (node.end - node.start) / 2)
-            #print('[debug] mid', mid)
+
             return rangeHelper(i, min(j, mid), node.left) + rangeHelper(max(i, mid), j, node.right)
 
         return rangeHelper(i, j + 1, self.root)
 
+'''
 
 if __name__ == "__main__":
     # l = [ 8, 0, 5, 4, 3, 12, 18, 2, 1]
@@ -209,4 +229,4 @@ if __name__ == "__main__":
     s1.update(bs[4])
     print('-----')
     s1.inorder(s1.root)
-
+'''
