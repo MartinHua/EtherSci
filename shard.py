@@ -5,17 +5,15 @@ from random import randint
 import sys
 import pickle
 import time
-from initial import script_dir, slaveAddrs
-from updater import updater
+from initial import script_dir, slaveAddrs,masterListenFromSlaveAddr
 
 
-listenAddr = (socket.gethostname(), randint(30000, 40000))
-print(listenAddr)
+
 
 def on_new_answer(addr):
     listen = socket.socket()
     listen.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    listen.bind(listenAddr)
+    listen.bind(masterListenFromSlaveAddr)
     listen.listen(12)
     while True:
         t, addre = listen.accept()
@@ -28,7 +26,6 @@ def query(start,end):
         s = socket.socket()
         s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         s.bind((socket.gethostname(), randint(30000, 40000)))
-        print(addr)
         s.connect(addr)
         message = pickle.dumps(("query", start, end, listenAddr))
         s.sendall(message)

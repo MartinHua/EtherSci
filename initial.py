@@ -16,8 +16,10 @@ slaveHosts = ["narsil-"+str(i) for i in range(3, 3+slave_num)]
 queryPort = 5000
 slaveAddrs = [(host, queryPort) for host in slaveHosts]
 
-updatePort = 4000
+updatePort = 3000
 slaveUpdateAddrs = [(host, updatePort) for host in slaveHosts]
+
+masterListenFromSlaveAddr = (socket.gethostname(), randint(30000, 40000))
 
 
 script_dir = '/scratch/cluster/xh3426/etherData/'
