@@ -11,15 +11,16 @@ listenAddr = (socket.gethostname(), masterListenPort)
 
 
 slave_num = 10
-hosts  = ["narsil-"+str(i) for i in range (3,3+slave_num)]
-slaveAddrs = [(host,5000) for host in hosts]
+slaveHosts = ["narsil-"+str(i) for i in range(3, 3+slave_num)]
 
+queryPort = 5000
+slaveAddrs = [(host, queryPort) for host in slaveHosts]
 
 updatePort = 4000
+slaveUpdateAddrs = [(host, updatePort) for host in slaveHosts]
 
 
 script_dir = '/scratch/cluster/xh3426/etherData/'
-#script_dir = os.path.dirname(os.path.dirname(__file__))+'/EtherData-master/'
 
 msgLength = 1024
 def recvAll(socket, length=msgLength):

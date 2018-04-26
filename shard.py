@@ -5,7 +5,7 @@ from random import randint
 import sys
 import pickle
 import time
-from initial import script_dir,slaveAddrs
+from initial import script_dir, slaveAddrs
 
 
 

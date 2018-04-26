@@ -9,18 +9,11 @@ from time2blk import time2blk
 from SegTree import *
 import time
 import datetime
-from initial import recvAll, sendAll, msgLength, script_dir,listenAddr
+from initial import recvAll, sendAll, msgLength, script_dir, listenAddr, updatePort
 
 
+sendFromPort = randint(2602, 29999)
 
-
-sendFromPort  = randint(2602,29999)#[randint(2602,29999),randint(2602,29999),randint(2602,29999),randint(2602,29999),randint(2602,29999)]
-
-updatePort = randint(5000,30000)
-
-
-# script_dir = '/scratch/cluster/xh3426/etherData/'
-# script_dir = os.path.dirname(os.path.dirname(__file__))+'/EtherData-master/'
 
 loadFileNum = 20
 fileBlockNum = 1000
@@ -28,9 +21,7 @@ toStoreTotalBlockNum = fileBlockNum*loadFileNum
 
 class slave(threading.Thread):
 
-
-
-    def __init__(self, sid, Port,partition,precision):
+    def __init__(self, sid, Port, partition, precision):
 
         self.sid = sid
         self.message = ""
@@ -42,35 +33,29 @@ class slave(threading.Thread):
         self.lock = threading.Lock()
         self.partition = partition
         # create a empty tree
-        self.tree = blkSegTree(self.offset, 150000) # offset (starting blk number), size of the tree
+        self.tree = blkSegTree(self.offset, 150000)
+        # offset (starting blk number), size of the tree
         self.mapping = time2blk(self.offset, 150000)
-        #self.mapping.setBegin(self.offset)
+        # self.mapping.setBegin(self.offset)
 
         for i in range(loadFileNum):
-
             filename = str(self.offset) + '.p'
             with open(script_dir + filename, 'rb') as f:
                 blks = pickle.load(f)
                 #print ('open file', filename, 'check start data', blks[self.offset])
                 for idx in range(int(fileBlockNum/self.partition)):
-
                     self.tree.update(self.getBlock(blks, idx))
-
                 self.mapping.buildMap(self.offset, filename)
             self.offset += fileBlockNum
-            #print('current tree size', self.tree.size)
-
-        self.host = socket.gethostname()
-        self.lock = threading.Lock()
+            # print('current tree size', self.tree.size)
 
         threading.Thread.__init__(self)
-        #threading.Thread(target=self.listen_new_block, args=()).start()
+        threading.Thread(target=self.listen_new_block, args=()).start()
 
     def getBlock(self, blks, idx):
-
-        index =  self.sid + self.offset + idx * self.partition
-        #print (idx, index, self.offset)
-        #print (index, blks[index])
+        index = self.sid + self.offset + idx * self.partition
+        # print (idx, index, self.offset)
+        # print (index, blks[index])
         return blks[index]
 
 
@@ -84,7 +69,6 @@ class slave(threading.Thread):
             threading.Thread(target=self.on_new_command, args=(command,)).start()
 
 
-
     def on_new_command(self, command,):
         while True:
             msg = recvAll(command, msgLength)
@@ -94,8 +78,8 @@ class slave(threading.Thread):
                     try:
                         entry = pickle.load(file)
                         if entry[0] == "query":
-                            answer = self.query(entry[1],entry[2])
-                            self.sendBack(answer,entry[3])
+                            answer = self.query(entry[1], entry[2])
+                            self.sendBack(answer, entry[3])
                     except EOFError:
                         break
 
@@ -115,11 +99,9 @@ class slave(threading.Thread):
             blk = pickle.load(io.BytesIO(rawblk))
             self.tree.update(blk)
             self.mapping.update(blk)
-            #self.draw()
-            print(blk)
+            print(blk["blockNum"])
 
-
-    def sendBack(self,answer,toAddr):
+    def sendBack(self, answer, toAddr):
         s = socket.socket()
         s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         s.bind((self.host, sendFromPort))
@@ -128,14 +110,15 @@ class slave(threading.Thread):
         s.close()
         return 0
 
-    def query(self,start,end,rangeStart=1,rangeEnd=5):
+    def query(self, start, end, rangeStart=1, rangeEnd=5):
         return self.tree.query_txFee_Sum(start, end)
+
 if len(sys.argv)>1:
     s = slave(*(eval(s) for s in sys.argv[1:]))
     s.start()
-    print ('test', s.query(4000000, 4000100))
-
-s = slave(0, randint(5000,10000), 1, 1)
-s.start()
-print('test', s.query(4000000, 4000100))
+    print('test', s.query(4000000, 4000100))
+else:
+    s = slave(0, randint(5000, 10000), 1, 1)
+    s.start()
+    print('test', s.query(4000000, 4000100))
 
