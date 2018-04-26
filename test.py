@@ -19,7 +19,7 @@ updatePort = 4000
 
 host = socket.gethostname()
 sendToAddr = (host, updatePort)
-offset = 4000000
+offset = 4030000
 filename = str(offset) + '.p'
 
 with open(script_dir + filename, 'rb') as f:
@@ -29,15 +29,16 @@ s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 s.bind((host, randint(30000, 40000)))
 s.connect(sendToAddr)
 
-for i in range(500):
 
-    filename = str(offset) + '.p'
-    with open(script_dir + filename, 'rb') as f:
-        blks = pickle.load(f)
+filename = str(offset) + '.p'
+with open(script_dir + filename, 'rb') as f:
+    blks = pickle.load(f)
+    for i in range(20):
+
         # print ('open file', filename, 'check start data', blks[self.offset])
         sendAll(s, pickle.dumps(blks[offset + i]))
-        time.sleep(0.5)
-    offset += 1000
+        time.sleep(1)
+    #offset += 1000
 
 
 
