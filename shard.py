@@ -21,7 +21,7 @@ class Master(threading.Thread):
         print(self.answerNum)
         threading.Thread(target=self.listen_answer, args=()).start()
         time.sleep(0.1)
-        os.system('bash slave.sh xh3426 10')
+        os.system('bash slave.sh cchsu 10')
         while len(self.working) < 10:
             time.sleep(5)
         print("Done!")
@@ -73,6 +73,16 @@ if __name__ == "__main__":
     master = Master()
     if len(sys.argv) > 1:
         master.query(*(eval(s) for s in sys.argv[1:]))
-    master.query(4000000, 4000999)
-    master.query(4000000, 4000999)
-    print(master.answerNum)
+
+    test = [0] * 24
+    pre_t = "12/07/2017 0:00"
+
+    for i in range(1, 24):
+        t = "12/07/2017 " + str(i) + ":00"
+
+        test[i] = master.query(pre_t, t)
+        print(test[i], 'query from', pre_t, ' to ', t)
+        pre_t = t
+    from draw import *
+
+    draw(test[1:])
