@@ -56,9 +56,9 @@ class slave(threading.Thread):
                 self.mapping.buildMap(self.offset, filename)
             self.offset += fileBlockNum
             # print('current tree size', self.tree.size)
-
         threading.Thread.__init__(self)
         threading.Thread(target=self.listen_new_block, args=()).start()
+        self.sendBack("done")
 
 
 
@@ -92,8 +92,8 @@ class slave(threading.Thread):
                     try:
                         entry = pickle.load(file)
                         if entry[0] == "query":
-                            answer = self.query(entry[1], entry[2])
-                            self.sendBack(answer)
+                            answer = self.query(entry[2], entry[3])
+                            self.sendBack("answer", entry[1], answer)
                     except EOFError:
                         break
 
@@ -115,8 +115,8 @@ class slave(threading.Thread):
             self.mapping.update(blk)
             print(blk["blockNum"])
 
-    def sendBack(self, answer):
-        sendAll(self.sendToMasterSocket, pickle.dumps(("answer", answer)), msgLength)
+    def sendBack(self, msgType, queryNum=None, answer=None):
+        sendAll(self.sendToMasterSocket, pickle.dumps((msgType, self.sid, queryNum, answer)), msgLength)
         return 0
 
     def query(self, start, end, rangeStart=1, rangeEnd=5):
@@ -125,7 +125,7 @@ class slave(threading.Thread):
 if len(sys.argv)>1:
     s = slave(*(eval(s) for s in sys.argv[1:]))
     s.start()
-    print('test', s.query(4000000, 4000100))
+    # print('test', s.query(4000000, 4000100))
 else:
     s = slave(0, randint(5000, 10000), 1, 1)
     s.start()
