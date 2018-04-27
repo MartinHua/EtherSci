@@ -135,8 +135,10 @@ class slave(threading.Thread):
         #return self.tree.query_txFee_range(start, end , rangeStart, rangeEnd)
         start = int(self.mapping.getBlk(startTime) / self.partition)
         end = int(self.mapping.getBlk(endTime) / self.partition)
-        #return self.tree.query_txFee_Sum(self.begin + start, self.begin + end)
-        return self.tree.query_topK_addrs(self.begin + start, self.begin + end)
+
+        return self.tree.query_txFee_Sum(self.begin + start, self.begin + end)
+        # return self.tree.query_topK_addrs(self.begin + start, self.begin + end)
+        # return self.tree.query_topK_pairs(self.begin + start, self.begin + end)
 
     def draw_day(self):
         import matplotlib.pyplot as plt
@@ -212,39 +214,74 @@ class slave(threading.Thread):
 s = slave(0,randint(5000,10000),2,1)
 s.start()
 
-month = 7
-year = 2017
-list = [0] * 30
-pre_t = "1/" + str(month) + "/" + str(year) + " 00:00"
-for i in range(2, 30):
-    t = str(i) + "/" + str(month) + "/" + str(year) + " 00:00"
 
-    list[i] = s.query(pre_t, t)
+
+
+# draw trends for a day # 16 is the critical point
+test = [0] * 24
+pre_t = "12/07/2017 0:00"
+
+for i in range(1, 24):
+    t = "12/07/2017 " + str(i) + ":00"
+
+    test[i] = s.query( pre_t,  t)
+    print(test[i], 'query from',  pre_t, ' to ', t)
     pre_t = t
 from draw import *
-print (list)
-#draw(list[1:])
+draw(test[1:])
 
-# #
-# import matplotlib.pyplot as plt
-# import numpy as np50
-# import seaborn as sns
+
+
+
+
+
+
+#######################################
+# # test a month
+# month = 7
+# year = 2017
+# list = [0] * 30
+# pre_t = "1/" + str(month) + "/" + str(year) + " 00:00"
+# for i in range(2, 30):
+#     t = str(i) + "/" + str(month) + "/" + str(year) + " 00:00"
+#     list[i] = s.query(pre_t, t)
+#     pre_t = t
+# from draw import *
+# print (list)
+
+
+
+# # test a year
+# year = 2017
+# list = [0] * 13
+# pre_t = "1/7" + "/" + str(year) + " 00:00"
+# for i in range(8, 13):
+#     t = "1/" + str(i) + "/" + str(year) + " 00:00"
+#     print (t)
+#     list[i] = s.query(pre_t, t)
+#     pre_t = t
+# from draw import *
+# print (list)
+
+
+t0= '1/7/2017 00:00'
+t1= '1/8/2017 00:00'
+print ('[ test ]')
+print (s.query(t0, t1))
+
+# test a hour
+#
 # test = [0] * 60
-# pre_t = 0
+# pre_t = "16/07/2017 6:00"
 #
 # for i in range(1, 60):
 #     t = "16/07/2017 6:" + str(i)
 #
 #     test[i] = s.query( pre_t,  t)
-#     print(test[i], 'query from', 4000000 + pre_b, ' to ', 4000000 + blk)
+#     print(test[i], 'query from',  pre_t, ' to ', t)
 #     pre_t = t
-#
-# sns.set_style("darkgrid")
-# plt.plot(test[2:])
-# plt.xlabel('days')
-# plt.ylabel('Transaction Fees')
-# plt.title('Transaction Fees (per block) per day')
-# plt.show()
+# from draw import *
+# draw(test[1:])
 
 
 

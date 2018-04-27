@@ -16,7 +16,7 @@ class Master(threading.Thread):
         self.queryNum = -1
         self.working = []
         self.answer = [0.]*1000
-        self.answerNum = [[None] for i in range(1000)]
+        self.answerNum = [[] for i in range(1000)]
         print(len(self.answerNum))
         print(self.answerNum)
         threading.Thread(target=self.listen_answer, args=()).start()

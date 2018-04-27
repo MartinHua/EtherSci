@@ -2,8 +2,8 @@ import pickle
 import time
 import datetime
 import os
-from initial import script_dir
-# script_dir = os.path.dirname(os.path.dirname(__file__))+'/EtherData-master/'
+#from initial import script_dir
+script_dir = os.path.dirname(os.path.dirname(__file__))+'/EtherData-master/'
 
 # this class helps to build a array where idx represent timestamp and value is the block number. idx = real_ - begin_ts
 class time2blk: # store block info
@@ -29,6 +29,7 @@ class time2blk: # store block info
         f.close()
 
         print (self.map[0], self.map[self.filledID-1])
+        print ('current ability: ', time.ctime(self.map[0]),time.ctime(self.map[self.filledID-1]) )
         return
     def update(self, blk):
         print()
@@ -42,13 +43,16 @@ class time2blk: # store block info
 
         chk = timestamp_int
 
-        if chk > self.map[self.filledID-1] or chk < self.map[0]:
-            print('try to get', chk, 'current limit', self.filledID, self.map[self.filledID - 1])
-            #print ('!!!error query. exceed boundary')
+        if chk > self.map[self.filledID-1]:
+            print('try to get', chk, 'but upper bound is',  self.map[self.filledID - 1])
+            return self.filledID - 1
+        if chk < self.map[0]:
+            print('try to get', chk, ' but lower bound is', self.map[0])
+            return 0
             #print ('Query ts is', chk, ', start from', self.map[0], '; end to:',  self.map[self.filledID-1])
             #if chk > self.map[self.filledID-1]:
             #    return self.filledID - 1
-            return self.size-1
+
         res = self.binarySearch(0, self.filledID-1, chk)
         return res
     def binarySearch( self,l, r, x):

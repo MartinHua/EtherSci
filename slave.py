@@ -27,7 +27,7 @@ class slave(threading.Thread):
         self.message = ""
         self.Port = Port
         self.updatePort = updatePort
-
+        self.begin= 4000000
         self.offset = 4000000
         self.host = socket.gethostname()
 
@@ -82,7 +82,6 @@ class slave(threading.Thread):
             command, addr = self.s.accept()  # Establish connection with client.
             threading.Thread(target=self.on_new_command, args=(command,)).start()
 
-
     def on_new_command(self, command,):
         while True:
             msg = recvAll(command, msgLength)
@@ -119,8 +118,12 @@ class slave(threading.Thread):
         sendAll(self.sendToMasterSocket, pickle.dumps((msgType, self.sid, queryNum, answer)), msgLength)
         return 0
 
-    def query(self, start, end, rangeStart=1, rangeEnd=5):
-        return self.tree.query_txFee_Sum(start, end)
+    def query(self, startTime, endTime, rangeStart=1, rangeEnd=5):
+        start = int(self.mapping.getBlk(startTime) / self.partition)
+        end = int(self.mapping.getBlk(endTime) / self.partition)
+        return self.tree.query_txFee_Sum(self.begin + start, self.begin + end)
+        #return self.tree.query_topK_addrs(self.begin + start, self.begin + end)
+
 
 if len(sys.argv)>1:
     s = slave(*(eval(s) for s in sys.argv[1:]))
