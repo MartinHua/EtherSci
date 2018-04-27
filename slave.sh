@@ -13,7 +13,7 @@ do
 	screen_name=$"narsil-$[$slave_num+3]"
 	screen -dmS $screen_name
 	sshcmd="ssh $logname@narsil-$[$slave_num+3].cs.utexas.edu"
-	pycmd=$"python3 $pyPath $slave_num 5000 $num 1"
+	pycmd=$"python3 $pyPath $slave_num 6000 $num 1"
 	screen -x -S $screen_name -p 0 -X stuff "$sshcmd\n"
 	screen -x -S $screen_name -p 0 -X stuff "$pycmd\n"
 done

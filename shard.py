@@ -13,10 +13,10 @@ class Master(threading.Thread):
 
     def __init__(self):
         threading.Thread.__init__(self)
-        self.queryNum = 0
+        self.queryNum = -1
         self.working = []
         self.answer = [0.]*1000
-        self.answerNum = [[], []]
+        self.answerNum = [[None] for i in range(1000)]
         print(len(self.answerNum))
         print(self.answerNum)
         threading.Thread(target=self.listen_answer, args=()).start()
@@ -49,14 +49,12 @@ class Master(threading.Thread):
                             self.working.append(entry[1])
                         elif entry[0] == "answer":
                             self.answerNum[entry[2]].append(entry[1])
-                            print(self.answerNum[entry[2]])
                             self.answer[entry[2]] += entry[3]
-                            if len(self.answerNum[entry[2]]) == 10:
-                                print(entry[2], self.answer[entry[2]])
                     except EOFError:
                         break
 
     def query(self, start, end):
+        self.queryNum += 1
         for addr in slaveAddrs:
             s = socket.socket()
             s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -65,7 +63,10 @@ class Master(threading.Thread):
             message = pickle.dumps(("query", self.queryNum, start, end))
             s.sendall(message)
         print(self.queryNum)
-        self.queryNum += 1
+        while True:
+            if len(self.answerNum[self.queryNum]) == 10:
+                return self.answer[self.queryNum]
+
 
 
 if __name__ == "__main__":
