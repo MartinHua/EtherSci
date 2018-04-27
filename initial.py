@@ -1,26 +1,46 @@
 
-import io
-import pickle
 import socket
+import threading
 import os
+import io
 from random import randint
+import sys
+import pickle
+import time
 
-# masterListenPort = randint(26002, 29999)
-# # masterAddr = (socket.gethostname(), masterPort)
-# listenAddr = (socket.gethostname(), masterListenPort)
-#
+
+#####################################################################
+# change to you local file
+# use the following command
+#print(os.getcwd())
+root_dir = "/v/filer5b/v20q001/fuli2015/PycharmProjects/EtherSci/"
+
+############################################################
+
+
+
+
+
+
+
+
+counter =int(open(root_dir + "123.txt",'r').readline())
+
+loadFileNum = 4
+fileBlockNum = 1000
+
 
 slave_num = 10
 slaveHosts = ["narsil-"+str(i) for i in range(3, 3+slave_num)]
 
-queryPort = 6000
+queryPort = counter
 slaveAddrs = [(host, queryPort) for host in slaveHosts]
 
-updatePort = 7000
+updatePort = counter+5
 slaveUpdateAddrs = [(host, updatePort) for host in slaveHosts]
 
-masterListenFromSlaveAddr = ('peanut-head-bug', 30640)
-
+masterListenFromSlaveAddr = ('planthopper', counter+10)
+print(masterListenFromSlaveAddr)
 
 script_dir = '/scratch/cluster/xh3426/etherData/'
 
@@ -42,4 +62,5 @@ def sendAll(socket, data, length=msgLength):
         socket.sendall(data[(cnt - length): cnt])
         cnt += length
     socket.sendall(data[(cnt - length): len(data)])
+
 

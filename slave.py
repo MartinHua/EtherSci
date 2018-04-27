@@ -9,14 +9,13 @@ from time2blk import time2blk
 from SegTree import *
 import time
 import datetime
-from initial import recvAll, sendAll, msgLength, script_dir, masterListenFromSlaveAddr, updatePort
+from initial import recvAll, sendAll, msgLength, script_dir, masterListenFromSlaveAddr, updatePort, loadFileNum,fileBlockNum
 
 
 sendFromPort = randint(2602, 29999)
 
 
-loadFileNum = 20
-fileBlockNum = 1000
+
 toStoreTotalBlockNum = fileBlockNum*loadFileNum
 
 class slave(threading.Thread):

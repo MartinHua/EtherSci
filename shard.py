@@ -6,13 +6,16 @@ from random import randint
 import sys
 import pickle
 import time
-from initial import script_dir, slaveAddrs, masterListenFromSlaveAddr, recvAll, msgLength
+
+
+
 
 
 class Master(threading.Thread):
 
     def __init__(self):
         threading.Thread.__init__(self)
+        print(socket.gethostname())
         self.queryNum = -1
         self.working = []
         self.answer = [0.]*1000
@@ -21,10 +24,17 @@ class Master(threading.Thread):
         print(self.answerNum)
         threading.Thread(target=self.listen_answer, args=()).start()
         time.sleep(0.1)
-        os.system('bash slave.sh cchsu 10')
+        os.system('bash slave.sh fuli2015 10 ' + str(queryPort))
         while len(self.working) < 10:
-            time.sleep(5)
+            time.sleep(0.5)
         print("Done!")
+        self.querySlaveSockets = []
+        for addr in slaveAddrs:
+            s = socket.socket()
+            s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            s.bind((socket.gethostname(), randint(30000, 40000)))
+            s.connect(addr)
+            self.querySlaveSockets.append(s)
 
     def listen_answer(self):
         listen = socket.socket()
@@ -55,11 +65,7 @@ class Master(threading.Thread):
 
     def query(self, start, end):
         self.queryNum += 1
-        for addr in slaveAddrs:
-            s = socket.socket()
-            s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-            s.bind((socket.gethostname(), randint(30000, 40000)))
-            s.connect(addr)
+        for s in self.querySlaveSockets:
             message = pickle.dumps(("query", self.queryNum, start, end))
             s.sendall(message)
         print(self.queryNum)
@@ -70,6 +76,11 @@ class Master(threading.Thread):
 
 
 if __name__ == "__main__":
+    out = open("123.txt", "w")
+    out.write(str(randint(4000,9000)))
+    out.close()
+    from initial import script_dir, slaveAddrs, masterListenFromSlaveAddr, recvAll, msgLength, queryPort
+
     master = Master()
     if len(sys.argv) > 1:
         master.query(*(eval(s) for s in sys.argv[1:]))
@@ -79,7 +90,6 @@ if __name__ == "__main__":
 
     for i in range(1, 24):
         t = "12/07/2017 " + str(i) + ":00"
-
         test[i] = master.query(pre_t, t)
         print(test[i], 'query from', pre_t, ' to ', t)
         pre_t = t
