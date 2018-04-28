@@ -1,7 +1,8 @@
 logname=$1
 num=$2
 port=$3
-pyPath="~/PycharmProjects/EtherSci/slave.py"
+
+pyPath="/u/cchsu/PycharmProjects/EtherSci1/slave.py"
 
 for ((slave_num=0;slave_num<$num;slave_num++))
 do
