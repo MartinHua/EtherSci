@@ -78,8 +78,8 @@ class blkSegTree(object):
             mid = int(node.start + (node.end - node.start) / 2)
             return rangeHelper(i, min(j, mid), node.left) + rangeHelper(max(i, mid), j, node.right)
 
-        print('query range', i, j)
-        return rangeHelper(i, j + 1, self.root)
+        #print('query range', i, j)
+        return rangeHelper(i, j , self.root)
 
     def update(self, blk):
         def getKey_Addr(tx):
@@ -164,7 +164,7 @@ class blkSegTree(object):
             mid = int(node.start + (node.end - node.start) / 2)
             return max(rangeHelper(i, min(j, mid), node.left), rangeHelper(max(i, mid), j, node.right))
 
-        return rangeHelper(i, j + 1, self.root)
+        return rangeHelper(i, j, self.root)
 
     def query_txFee_Num(self, i, j):
 
@@ -177,7 +177,7 @@ class blkSegTree(object):
             mid = int(node.start + (node.end - node.start) / 2)
             return rangeHelper(i, min(j, mid), node.left) + rangeHelper(max(i, mid), j, node.right)
 
-        return rangeHelper(i, j + 1, self.root)
+        return rangeHelper(i, j, self.root)
     def query_topK_addrs(self, i, j):
 
         def rangeHelper(i, j, node):
@@ -195,7 +195,7 @@ class blkSegTree(object):
             for i in range(min(topK, len(tempList))):
                 currTopK[topKList[i][0]] = topKList[i][1]
             return currTopK
-        return rangeHelper(i, j + 1, self.root)
+        return rangeHelper(i, j , self.root)
     def query_topK_pairs(self, i, j):
 
         def rangeHelper(i, j, node):
@@ -213,7 +213,7 @@ class blkSegTree(object):
             for i in range(min(topK, len(tempList))):
                 currTopK[topKList[i][0]] = topKList[i][1]
             return currTopK
-        return rangeHelper(i, j + 1, self.root)
+        return rangeHelper(i, j, self.root)
     def query_txFee_range(self, i, j, low, up):
 
         def rangeHelper(i, j, node):
@@ -229,7 +229,7 @@ class blkSegTree(object):
 
             return rangeHelper(i, min(j, mid), node.left) + rangeHelper(max(i, mid), j, node.right)
 
-        return rangeHelper(i, j + 1, self.root)
+        return rangeHelper(i, j, self.root)
 
 '''
 

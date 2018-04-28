@@ -214,23 +214,69 @@ class slave(threading.Thread):
 s = slave(0,randint(5000,10000),2,1)
 s.start()
 
-
-
-
-# draw trends for a day # 16 is the critical point
-test = [0] * 24
-pre_t = "12/07/2017 0:00"
-
-for i in range(1, 24):
-    t = "12/07/2017 " + str(i) + ":00"
-
-    test[i] = s.query( pre_t,  t)
-    print(test[i], 'query from',  pre_t, ' to ', t)
-    pre_t = t
 from draw import *
-draw(test[1:])
+
+test = [0] * 24
+pre_t = "1/07/2017 0:00"
+
+from datetime import timedelta, date
 
 
+def daterange(date1, date2):
+    for n in range(int((date2 - date1).days) + 1):
+        yield date1 + timedelta(n)
+
+
+start_dt = date(2017, 7, 2)
+end_dt = date(2017, 7, 31)
+test = []
+pre_t = "1/7/2017 0:00"
+for dt in daterange(start_dt, end_dt):
+    t = dt.strftime("%d/%m/%Y") + ' 0:00'
+    test.append(s.query(pre_t, t))
+    pre_t = t
+print (test)
+draw(test, 'transaction fees per day')
+
+
+# # draw trends for a day # 16 is the critical point
+# test = [0] * 24
+# pre_t = "12/07/2017 0:00"
+#
+# for i in range(1, 24):
+#     t = "12/07/2017 " + str(i) + ":00"
+#
+#     test[i] = s.query( pre_t,  t)
+#     print(test[i], 'query from',  pre_t, ' to ', t)
+#     pre_t = t
+# from draw import *
+# draw(test[1:])
+
+# # draw trends for a year
+# year = 2017
+# list = [0] * 13
+# pre_t = "1/1" + "/" + str(year) + " 00:00"
+# for i in range(2, 13):
+#     t = "1/" + str(i) + "/" + str(year) + " 00:00"
+#     list[i] = s.query(pre_t, t)
+#     pre_t = t
+# from draw import *
+# print (list)
+# draw(list[1:])
+
+# # draw trend for FX Fee in a day cumulating from a month
+# test = [0] * 24
+# pre_t = "1/07/2017 0:00"
+# for j in range(2, 31):
+#     for i in range(1, 24):
+#         t = str(j) + "/07/2017 " + str(i) + ":00"
+#
+#         test[i] += s.query(pre_t, t)
+#         print(test[i], 'query from', pre_t, ' to ', t)
+#         pre_t = t
+# from draw import *
+# print (test)
+# draw(test[1:])
 
 
 
@@ -263,11 +309,6 @@ draw(test[1:])
 # from draw import *
 # print (list)
 
-
-t0= '1/7/2017 00:00'
-t1= '1/8/2017 00:00'
-print ('[ test ]')
-print (s.query(t0, t1))
 
 # test a hour
 #

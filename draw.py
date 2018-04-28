@@ -1,4 +1,4 @@
-def draw(list):
+def draw(list, title = 'Transaction Fees (per block)'):
     import matplotlib.pyplot as plt
     import numpy as np50
     import seaborn as sns
@@ -8,7 +8,7 @@ def draw(list):
     plt.plot(list)
     plt.xlabel('time')
     plt.ylabel('Transaction Fees')
-    plt.title('Transaction Fees (per block) per day')
+    plt.title(title)
     plt.show()
 
 
