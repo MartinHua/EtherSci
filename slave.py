@@ -2,13 +2,10 @@ import socket  # Import socket module
 import threading
 import pickle
 import io
-import os
 import sys
 from random import randint
 from time2blk import time2blk
 from SegTree import *
-import time
-import datetime
 from initial import recvAll, sendAll, msgLength, script_dir, masterListenFromSlaveAddr, updatePort, loadFileNum,fileBlockNum
 
 
@@ -131,5 +128,5 @@ if len(sys.argv)>1:
 else:
     s = slave(0, randint(5000, 10000), 1, 1)
     s.start()
-    print('test', s.query(4000000, 4000100))
+    print('test', s.query("13/07 14:00", "13/07 15:00"))
 

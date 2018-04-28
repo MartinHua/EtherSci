@@ -2,8 +2,8 @@ import pickle
 import time
 import datetime
 import os
-#from initial import script_dir
-script_dir = os.path.dirname(os.path.dirname(__file__))+'/EtherData-master/'
+from initial import script_dir
+
 
 # this class helps to build a array where idx represent timestamp and value is the block number. idx = real_ - begin_ts
 class time2blk: # store block info

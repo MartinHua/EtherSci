@@ -26,7 +26,10 @@ root_dir = "/v/filer5b/v20q001/fuli2015/PycharmProjects/EtherSci/"
 
 counter =int(open(root_dir + "123.txt",'r').readline())
 
-loadFileNum = 4
+print(counter)
+masterPort = counter -1
+
+loadFileNum = 100
 fileBlockNum = 1000
 
 
