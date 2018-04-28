@@ -18,13 +18,11 @@ class Master(threading.Thread):
         print(socket.gethostname())
         self.queryNum = -1
         self.working = []
-        self.answer = [0.]*1000
-        self.answerNum = [[] for i in range(1000)]
-        print(len(self.answerNum))
-        print(self.answerNum)
+        self.answer = 0.0
+        self.answerNum = 0
         threading.Thread(target=self.listen_answer, args=()).start()
         time.sleep(0.1)
-        os.system('bash slave.sh cchsu 10 ' + str(queryPort))
+        os.system('bash slave.sh fuli2015 10 ' + str(queryPort))
         while len(self.working) < 10:
             time.sleep(0.5)
         print("Done!")
@@ -54,12 +52,13 @@ class Master(threading.Thread):
                 while True:
                     try:
                         entry = pickle.load(file)
-                        print(entry)
+
                         if entry[0] == "done":
                             self.working.append(entry[1])
                         elif entry[0] == "answer":
-                            self.answerNum[entry[2]].append(entry[1])
-                            self.answer[entry[2]] += entry[3]
+                            self.answerNum += 1
+                            print(self.answerNum)
+                            self.answer += entry[3]
                     except EOFError:
                         break
 
@@ -75,7 +74,7 @@ class Master(threading.Thread):
                         print(entry)
                         # query type, start,end
                         command.sendall(pickle.dumps(
-                                                self.query(entry[1],entry[2])
+                                                self.query(entry[1], entry[2])
                                                 )
                                         )
                     except EOFError:
@@ -83,18 +82,20 @@ class Master(threading.Thread):
 
     def query(self, start, end):
         self.queryNum += 1
+        self.answerNum = 0
+        self.answer = 0.0
         for s in self.querySlaveSockets:
             message = pickle.dumps(("query", self.queryNum, start, end))
             s.sendall(message)
         print(self.queryNum)
         while True:
-            if len(self.answerNum[self.queryNum]) == 10:
-                return self.answer[self.queryNum]
+            if self.answerNum == 10:
+                return self.answer
 
     def run(self):
         listen = socket.socket()
         listen.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        listen.bind((socket.gethostname(),masterPort))
+        listen.bind((socket.gethostname(), masterPort))
         listen.listen(12)
 
         while True:
@@ -104,13 +105,11 @@ class Master(threading.Thread):
 
 if __name__ == "__main__":
     out = open("123.txt", "w")
-    out.write(str(randint(4000,9000)))
+    out.write(str(randint(4000, 9000)))
     out.close()
     from initial import masterPort, slaveAddrs, masterListenFromSlaveAddr, recvAll, msgLength, queryPort
     master = Master()
     master.start()
-    if len(sys.argv) > 1:
-        master.query(*(eval(s) for s in sys.argv[1:]))
     #
     # test = [0] * 24
     # pre_t = "12/07/2017 0:00"

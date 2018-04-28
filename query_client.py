@@ -6,9 +6,6 @@ from random import randint
 import io
 
 Port =  randint(3000, 9000)
-def query(s,start,end):
-    msg = pickle.dumps(("query",start,end))
-    s.sendall(msg)
 
 def parse(msg):
     if (msg != b''):
@@ -19,6 +16,11 @@ def parse(msg):
                 return entry
             except EOFError:
                 break
+def query(s,start,end):
+    msg = pickle.dumps(("query",start,end))
+    s.sendall(msg)
+    return parse(recvAll(s))
+
 
 
 masterAddr = (socket.gethostname(),masterPort)
@@ -30,31 +32,62 @@ s.connect(masterAddr)
 ######################################
 
 
-
-
-test = [0] * 24
-pre_t = "12/07/2017 0:00"
-
-for i in range(1, 24):
-    t = "12/07/2017 " + str(i) + ":00"
-    test[i] = query(pre_t, t)
-    print(test[i], 'query from', pre_t, ' to ', t)
-    pre_t = t
 from draw import *
 
-draw(test[1:])
+from datetime import timedelta, date
+import time
 
-# # draw trends for a year
-# year = 2017
-# list = [0] * 13
-# pre_t = "1/1" + "/" + str(year) + " 00:00"
-# for i in range(2, 13):
-#     t = "1/" + str(i) + "/" + str(year) + " 00:00"
-#     list[i] = query(s,pre_t, t)
+def daterange(date1, date2):
+    for n in range(int((date2 - date1).days) + 1):
+        yield date1 + timedelta(n)
+
+# # (1) transaction fees per day for a year
+# start_dt = date(2017, 7, 2)
+# end_dt = date(2017, 8, 31)
+# test = []
+# pre_t = "1/7/2017 0:00"
+# for dt in daterange(start_dt, end_dt):
+#     t = dt.strftime("%d/%m/%Y") + ' 0:00'
+#     test.append(query(s, pre_t, t))
+#     print(test[-1], 'query from', pre_t, ' to ', t)
+#     pre_t = t
+# print (test)
+# draw(test, 'transaction fees per day')
+
+#
+# # (2) transaction fees per hour for a certain day
+# test = [0] * 24
+# pre_t = "12/07/2017 0:00"
+#
+# for i in range(1, 24):
+#     t = "12/07/2017 " + str(i) + ":00"
+#     test[i] = query(s, pre_t, t)
+#     print(test[i], 'query from', pre_t, ' to ', t)
 #     pre_t = t
 # from draw import *
 #
-# draw(list[1:])
+# draw(test[1:])
+
+# (3) transaction fees per hour cumuating from a month
+
+start_dt = date(2017, 7, 9)
+end_dt = date(2017, 7, 25)
+test = [0] * 24
+
+start_time = time.time()
+for dt in daterange(start_dt, end_dt):
+    pre_t = dt.strftime("%d/%m/%Y") + ' 0:00'
+    for i in range(1, 24):
+        t = dt.strftime("%d/%m/%Y") + ' ' + str(i) +':00'
+        test[i] += (query(s, pre_t, t))
+        print(test[-1], 'query from', pre_t, ' to ', t)
+        pre_t = t
+end_time = time.time()
+print ((end_time - start_time)/(23*17))
+print (test[1:])
+draw(test[1:], 'transaction fees per hour')
+
+
 #
 # # draw trend for FX Fee in a day cumulating from a month
 # test = [0] * 24

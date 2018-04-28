@@ -23,8 +23,8 @@ class slave(threading.Thread):
         self.message = ""
         self.Port = Port
         self.updatePort = updatePort
-        self.begin = 4000000
-        self.offset = 4000000
+        self.begin = 0 #4000000
+        self.offset = 0 #4000000
         self.host = socket.gethostname()
 
         self.sendToMasterSocket = socket.socket()
@@ -36,9 +36,9 @@ class slave(threading.Thread):
         self.lock = threading.Lock()
         self.partition = partition
         # create a empty tree
-        self.tree = blkSegTree(self.offset, 150000)
+        self.tree = blkSegTree(self.offset, 600000)
         # offset (starting blk number), size of the tree
-        self.mapping = time2blk(self.offset, 150000)
+        self.mapping = time2blk(self.offset, 6000000)
         # self.mapping.setBegin(self.offset)
 
 

@@ -13,7 +13,7 @@ import time
 # change to you local file
 # use the following command
 #print(os.getcwd())
-root_dir = "/u/cchsu/PycharmProjects/EtherSci1/"
+root_dir = "/u/fuli2015/PycharmProjects/EtherSci/"
 
 ############################################################
 
@@ -29,11 +29,11 @@ counter =int(open(root_dir + "123.txt",'r').readline())
 print(counter)
 masterPort = counter -1
 
-loadFileNum = 5
+loadFileNum = 5000
 fileBlockNum = 1000
 
 
-slave_num = 1
+slave_num = 10
 slaveHosts = ["narsil-"+str(i) for i in range(3, 3+slave_num)]
 
 queryPort = counter
