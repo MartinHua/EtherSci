@@ -24,7 +24,7 @@ class Master(threading.Thread):
         print(self.answerNum)
         threading.Thread(target=self.listen_answer, args=()).start()
         time.sleep(0.1)
-        os.system('bash slave.sh fuli2015 10 ' + str(queryPort))
+        os.system('bash slave.sh cchsu 10 ' + str(queryPort))
         while len(self.working) < 10:
             time.sleep(0.5)
         print("Done!")
@@ -93,6 +93,32 @@ if __name__ == "__main__":
         test[i] = master.query(pre_t, t)
         print(test[i], 'query from', pre_t, ' to ', t)
         pre_t = t
+    from draw import *
+
+    draw(test[1:])
+
+
+    # draw trends for a year
+    year = 2017
+    list = [0] * 13
+    pre_t = "1/1" + "/" + str(year) + " 00:00"
+    for i in range(2, 13):
+        t = "1/" + str(i) + "/" + str(year) + " 00:00"
+        list[i] = master.query(pre_t, t)
+        pre_t = t
+    from draw import *
+    draw(list[1:])
+
+    # draw trend for FX Fee in a day cumulating from a month
+    test = [0] * 24
+    pre_t = "1/07/2017 0:00"
+    for j in range(2, 31):
+        for i in range(1, 24):
+            t = str(j) + "/07/2017 " + str(i) + ":00"
+
+            test[i] += master.query(pre_t, t)
+            print(test[i], 'query from', pre_t, ' to ', t)
+            pre_t = t
     from draw import *
 
     draw(test[1:])

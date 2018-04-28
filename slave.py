@@ -26,7 +26,7 @@ class slave(threading.Thread):
         self.message = ""
         self.Port = Port
         self.updatePort = updatePort
-        self.begin= 4000000
+        self.begin = 4000000
         self.offset = 4000000
         self.host = socket.gethostname()
 
@@ -118,8 +118,8 @@ class slave(threading.Thread):
         return 0
 
     def query(self, startTime, endTime, rangeStart=1, rangeEnd=5):
-        start = int(self.mapping.getBlk(startTime) / self.partition)
-        end = int(self.mapping.getBlk(endTime) / self.partition)
+        start = int(self.mapping.getBlk(startTime) / self.partition) #+ self.mapping.getBlk(startTime) % self.partition
+        end = int(self.mapping.getBlk(endTime) / self.partition) # + self.mapping.getBlk(endTime) % self.partition)
         return self.tree.query_txFee_Sum(self.begin + start, self.begin + end)
         #return self.tree.query_topK_addrs(self.begin + start, self.begin + end)
 
