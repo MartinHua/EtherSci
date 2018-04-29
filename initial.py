@@ -17,9 +17,13 @@ root_dir = "/u/fuli2015/PycharmProjects/EtherSci/"
 
 ############################################################
 
+#begin and offset in slave
+begin = 3000000
+offset = 3000000
 
-
-
+#
+treeSize = 6000000
+mappingSize = 60000000
 
 
 
@@ -29,7 +33,7 @@ counter =int(open(root_dir + "123.txt",'r').readline())
 print(counter)
 masterPort = counter -1
 
-loadFileNum = 5000
+loadFileNum = 10
 fileBlockNum = 1000
 
 
@@ -42,10 +46,11 @@ slaveAddrs = [(host, queryPort) for host in slaveHosts]
 updatePort = counter+5
 slaveUpdateAddrs = [(host, updatePort) for host in slaveHosts]
 
-masterListenFromSlaveAddr = ('planthopper', counter+10)
+masterListenFromSlaveAddr = ('rhinoceros-beetle', counter+10)
 print(masterListenFromSlaveAddr)
 
 script_dir = '/scratch/cluster/xh3426/etherData/'
+#script_dir = os.path.dirname(os.path.dirname(__file__))+'/EtherData-master/'
 
 msgLength = 1024
 def recvAll(socket, length=msgLength):

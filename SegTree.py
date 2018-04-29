@@ -312,21 +312,21 @@ class blkSegTree(object):
 
         return rangeHelper(i, j, self.root)
 
-'''
 
-if __name__ == "__main__":
-    # l = [ 8, 0, 5, 4, 3, 12, 18, 2, 1]
-    l = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-    bs = []
-    for i in range(10):
-        b = dict()
-        b["txFee"] = l[i]
-        t = dict()
-        t["txFee"] = 0.0005
-        b["transactions"] = [t]
-        bs.append(b)
-
-
+#
+# if __name__ == "__main__":
+#     # l = [ 8, 0, 5, 4, 3, 12, 18, 2, 1]
+#     l = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+#     bs = []
+#     for i in range(10):
+#         b = dict()
+#         b["txFee"] = l[i]
+#         t = dict()
+#         t["txFee"] = 0.0005
+#         b["transactions"] = [t]
+#         bs.append(b)
+#
+#
 
 # #
 # if __name__ == "__main__":
@@ -356,5 +356,3 @@ if __name__ == "__main__":
 #
 #     print('-----')
 #     print(s1.query_topK_tx(3,6))
-# #    s1.inorder(s1.root)
-

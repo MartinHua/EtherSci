@@ -6,7 +6,11 @@ import sys
 from random import randint
 from time2blk import time2blk
 from SegTree import *
-from initial import recvAll, sendAll, msgLength, script_dir, masterListenFromSlaveAddr, updatePort, loadFileNum,fileBlockNum,queryPort
+
+from initial import *
+
+#begin,offset, recvAll, sendAll, msgLength, script_dir,
+#  masterListenFromSlaveAddr, updatePort, loadFileNum,fileBlockNum,queryPort
 
 
 sendFromPort = randint(2602, 29999)
@@ -23,8 +27,8 @@ class slave(threading.Thread):
         self.message = ""
         self.Port = Port
         self.updatePort = updatePort
-        self.begin = 400000
-        self.offset = 4000000
+        self.begin = begin
+        self.offset = offset
         self.host = socket.gethostname()
 
         self.sendToMasterSocket = socket.socket()
@@ -36,9 +40,9 @@ class slave(threading.Thread):
         self.lock = threading.Lock()
         self.partition = partition
         # create a empty tree
-        self.tree = blkSegTree(self.offset, 20000)
+        self.tree = blkSegTree(self.offset, treeSize)
         # offset (starting blk number), size of the tree
-        self.mapping = time2blk(self.offset, 200000)
+        self.mapping = time2blk(self.offset, mappingSize)
         # self.mapping.setBegin(self.offset)
 
 
@@ -46,7 +50,7 @@ class slave(threading.Thread):
             filename = str(self.offset) + '.p'
             with open(script_dir + filename, 'rb') as f:
                 blks = pickle.load(f)
-                #print ('open file', filename, 'check start data', blks[self.offset])
+                print ('open file', filename, 'check start data', blks[self.offset])
                 for idx in range(int(fileBlockNum/self.partition)):
                     self.tree.update(self.getBlock(blks, idx))
                 self.mapping.buildMap(self.offset, filename)
