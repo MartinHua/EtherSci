@@ -18,12 +18,12 @@ root_dir = "/u/fuli2015/PycharmProjects/EtherSci/"
 ############################################################
 
 #begin and offset in slave
-begin = 3000000
-offset = 3000000
+begin = 4000000
+offset = 4000000
 
 #
-treeSize = 6000000
-mappingSize = 60000000
+treeSize = 6000
+mappingSize = 60000
 
 
 
