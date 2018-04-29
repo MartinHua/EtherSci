@@ -135,10 +135,11 @@ class slave(threading.Thread):
         #return self.tree.query_txFee_range(start, end , rangeStart, rangeEnd)
         start = int(self.mapping.getBlk(startTime) / self.partition)
         end = int(self.mapping.getBlk(endTime) / self.partition)
-
+        # return self.tree.query_topK_tx(self.begin + start, self.begin + end)
         return self.tree.query_txFee_Sum(self.begin + start, self.begin + end)
         # return self.tree.query_topK_addrs(self.begin + start, self.begin + end)
         # return self.tree.query_topK_pairs(self.begin + start, self.begin + end)
+
 
     def draw_day(self):
         import matplotlib.pyplot as plt
@@ -227,18 +228,19 @@ def daterange(date1, date2):
         yield date1 + timedelta(n)
 
 
-start_dt = date(2017, 7, 2)
-end_dt = date(2017, 7, 31)
-test = []
-pre_t = "1/7/2017 0:00"
-for dt in daterange(start_dt, end_dt):
-    t = dt.strftime("%d/%m/%Y") + ' 0:00'
-    test.append(s.query(pre_t, t))
-    pre_t = t
-print (test)
-draw(test, 'transaction fees per day')
-
-
+# start_dt = date(2017, 7, 2)
+# end_dt = date(2017, 7, 31)
+# test = []
+# pre_t = "1/7/2017 0:00"
+# for dt in daterange(start_dt, end_dt):
+#     t = dt.strftime("%d/%m/%Y") + ' 0:00'
+#     test.append(s.query(pre_t, t))
+#     pre_t = t
+# print (test)
+# draw(test, 'transaction fees per day')
+pre_t = "10/7/2017 0:00"
+t = "11/7/2017 0:00"
+print (s.query( pre_t,  t))
 # # draw trends for a day # 16 is the critical point
 # test = [0] * 24
 # pre_t = "12/07/2017 0:00"

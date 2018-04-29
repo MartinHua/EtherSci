@@ -1,5 +1,8 @@
 topK = 5
+topKTx = 5
 from collections import Counter
+
+
 class blkNode:  # store block info
     def __init__(self, start, end, precision, blk=None):
         # self.blockNum = blk["blockNum"]
@@ -20,6 +23,7 @@ class blkNode:  # store block info
         self.numTx = 0
         self.topAddrs = dict()
         self.topPairs = dict()
+        self.topTXFees = []
         if blk is not None:
             self.txFee = blk["txFee"]
             for i in range(n):
@@ -105,7 +109,17 @@ class blkSegTree(object):
             for i in range(min(topK, len(addrCount))):
                 res[topKList[i][0]] = topKList[i][1]
             return res
-
+        def updateTopTXFees(blk):
+            res = []
+            txs = blk['transactions']
+            sorted_txs = sorted(txs, key=lambda x: x['txFee'], reverse=True)
+            count = 0
+            for tx in sorted_txs:
+                if count == topKTx:
+                    break
+                res.append((tx['txHash'], tx['txFee']))
+                count += 1
+            return res
         def updateNode(node, blk):
             node.txFee = blk["txFee"]
             n = int(10 / self.precision)
@@ -115,19 +129,46 @@ class blkSegTree(object):
             node.numTx = len(blk['transactions'])
             node.topAddrs = updateTopK(blk, 'Addr')
             node.topPairs = updateTopK(blk, 'Pair')
+            node.topTXFees = updateTopTXFees(blk)
         #def mergeTopK(node, type):
         def mergeNode(node):
             node.txFee = node.left.txFee + node.right.txFee
             node.numTx = node.left.numTx + node.right.numTx
             node.rangeTx = [x + y for x, y in zip(node.left.rangeTx, node.right.rangeTx)]
+            # merge top addresses
             tempList = Counter(node.left.topAddrs) + Counter(node.right.topAddrs)
             topKList = Counter(tempList).most_common(topK)
             for i in range(min(topK, len(tempList))):
                 node.topAddrs[topKList[i][0]] = topKList[i][1]
+            # merge top pairs
             tempList = Counter(node.left.topPairs) + Counter(node.right.topPairs)
             topKList = Counter(tempList).most_common(topK)
             for i in range(min(topK, len(tempList))):
                 node.topPairs[topKList[i][0]] = topKList[i][1]
+            # merge top tx fees # merge 2 sorted list
+            i, j, count = 0, 0, 0
+            leftL = len(node.left.topTXFees)
+            rightL = len(node.right.topTXFees)
+            node.topTXFees = []
+            while count < topKTx:
+                if i >= leftL and j >= rightL:
+                    count += 1
+                    continue
+                if j >= rightL:
+                    node.topTXFees.append(node.left.topTXFees[i])
+                    i += 1
+                    continue
+                if i >= leftL:
+                    node.topTXFees.append(node.right.topTXFees[j])
+                    j += 1
+                    continue
+                if node.left.topTXFees[i][1] > node.right.topTXFees[j][1]:
+                    node.topTXFees.append(node.left.topTXFees[i])
+                    i += 1
+                else:
+                    node.topTXFees.append(node.right.topTXFees[j])
+                    j += 1
+                count += 1
 
         def updateHelper(blk, node):
 
@@ -141,7 +182,7 @@ class blkSegTree(object):
                     updateHelper(blk, node.right)
                 mergeNode(node)
 
-        #print ('put in ', self.filledID)
+
         if blk:
             updateHelper(blk, self.root)
             self.filledID += 1
@@ -178,6 +219,46 @@ class blkSegTree(object):
             return rangeHelper(i, min(j, mid), node.left) + rangeHelper(max(i, mid), j, node.right)
 
         return rangeHelper(i, j, self.root)
+    def query_topK_tx(self,i,j):
+        def rangeHelper(i, j, node):
+            # return covered sum
+            if node == None or i >= node.end or j <= node.start:
+                return []
+            if i == node.start and j == node.end:
+                return node.topTXFees
+
+
+            mid = int(node.start + (node.end - node.start) / 2)
+            # merge top tx fees # merge 2 sorted list
+            left= rangeHelper(i, min(j, mid), node.left)
+            right=rangeHelper(max(i, mid), j, node.right)
+            leftL = len(left)
+            rightL = len(right)
+            rls= []
+            i, j, count = 0, 0, 0
+            while count < topKTx:
+                if i >= leftL and j >= rightL:
+                    break
+                if j >= rightL:
+                    rls.append(left[i])
+                    i += 1
+                    continue
+                if i >= leftL:
+                    rls.append(right[j])
+                    j += 1
+                    continue
+                if left[i][1] > right[j][1]:
+                    rls.append(left[i])
+                    i += 1
+                else:
+                    rls.append(right[j])
+                    j += 1
+                count += 1
+            return rls
+
+        return rangeHelper(i, j, self.root)
+
+
     def query_topK_addrs(self, i, j):
 
         def rangeHelper(i, j, node):
@@ -231,32 +312,34 @@ class blkSegTree(object):
 
         return rangeHelper(i, j, self.root)
 
-'''
 
-if __name__ == "__main__":
-    # l = [ 8, 0, 5, 4, 3, 12, 18, 2, 1]
-    l = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-    bs = []
-    for i in range(10):
-        b = dict()
-        b["txFee"] = l[i]
-        t = dict()
-        t["txFee"] = 0.0005
-        b["transactions"] = [t]
-        bs.append(b)
+# #
+# if __name__ == "__main__":
+#     # l = [ 8, 0, 5, 4, 3, 12, 18, 2, 1]
+#     l = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+#     bs = []
+#     for i in range(10):
+#         b = dict()
+#         b["txFee"] = l[i]
+#         t = dict()
+#         t["txFee"] = 10*i
+#         t["from"] = i
+#         t["to"] = i
+#         t["txHash"] = i
+#         b["transactions"] = [t]
+#
+#         bs.append(b)
+#
+#
+#
+#     s1 = blkSegTree(0, 10)
+#
+#     s1.inorder(s1.root)
+#     print('-----')
+#     for i in range(10):
+#         s1.update(bs[i])
+#
+#     print('-----')
+#     print(s1.query_topK_tx(3,6))
+# #    s1.inorder(s1.root)
 
-
-
-    s1 = blkSegTree(0, 5)
-
-    s1.inorder(s1.root)
-    print('-----')
-
-    s1.update(bs[0])
-    s1.update(bs[1])
-    s1.update(bs[2])
-    s1.update(bs[3])
-    s1.update(bs[4])
-    print('-----')
-    s1.inorder(s1.root)
-'''
