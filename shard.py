@@ -18,7 +18,7 @@ class Master(threading.Thread):
         print(socket.gethostname())
         self.queryNum = -1
         self.working = []
-        self.answer = 0.0
+        self.answer = None
         self.answerNum = 0
         threading.Thread(target=self.listen_answer, args=()).start()
         time.sleep(0.1)
@@ -52,12 +52,22 @@ class Master(threading.Thread):
                 while True:
                     try:
                         entry = pickle.load(file)
-
+                        print(entry)
                         if entry[0] == "done":
                             self.working.append(entry[1])
                         else:
+                            if self.answerNum == 0:
+                                if type(entry[3])== float:
+                                    self.answer = 0.0
+                                else:
+                                    self.answer = []
+                            if type(entry[3]) == dict():
+                                self.answer += entry[3].items()
+                                self.answerNum += 1
+                                continue
                             self.answerNum += 1
                             print(self.answerNum)
+                            print(self.answer)
                             self.answer += entry[3]
                     except EOFError:
                         break

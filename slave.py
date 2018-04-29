@@ -125,7 +125,8 @@ class slave(threading.Thread):
         try:
             return eval("self.tree."+ queryType+"(self.begin + start, self.begin + end)")
         except:
-            return -1
+            print("Error")
+            return -1.0
         #return self.tree.query_topK_addrs(self.begin + start, self.begin + end)
 
 

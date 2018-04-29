@@ -264,7 +264,7 @@ class blkSegTree(object):
         def rangeHelper(i, j, node):
             # return covered sum
             if node == None or i >= node.end or j <= node.start:
-                return
+                return dict()
             if i == node.start and j == node.end:
                 return node.topAddrs
             mid = int(node.start + (node.end - node.start) / 2)
@@ -282,7 +282,7 @@ class blkSegTree(object):
         def rangeHelper(i, j, node):
             # return covered sum
             if node == None or i >= node.end or j <= node.start:
-                return
+                return dict()
             if i == node.start and j == node.end:
                 return node.topPairs
             mid = int(node.start + (node.end - node.start) / 2)

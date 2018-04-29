@@ -17,7 +17,7 @@ def parse(msg):
             except EOFError:
                 break
 def query(s,start,end):
-    msg = pickle.dumps(("query_txFee_Max",start,end))
+    msg = pickle.dumps(("query_topK_pairs",start,end))
     s.sendall(msg)
     return parse(recvAll(s))
 
@@ -42,7 +42,7 @@ def daterange(date1, date2):
         yield date1 + timedelta(n)
 
 print("GH")
-print (query(s,"9/07/2017 20:00","9/07/2017 21:00"))
+print (query(s,"10/07/2017 20:00","11/07/2017 22:00"))
 # # (1) transaction fees per day for a year
 # start_dt = date(2017, 1, 1)
 # end_dt = date(2017, 7, 31)
@@ -75,39 +75,39 @@ print (query(s,"9/07/2017 20:00","9/07/2017 21:00"))
 
 #(3) transaction fees per hour cumuating from a month
 
-start_dt = date(2017, 7, 9)
-end_dt = date(2017, 7, 11)
-test = [0] * 24
-count = 0
-start_time = time.time()
-for dt in daterange(start_dt, end_dt):
-    pre_t = dt.strftime("%d/%m/%Y") + ' 15:00'
-    for i in range(1, 24):
-        t = dt.strftime("%d/%m/%Y") + ' ' + str(i) +':00'
-        test[i] += (query(s, pre_t, t))
-        #print(test[-1], 'query from', pre_t, ' to ', t)
-        pre_t = t
-        count += 1
-end_time = time.time()
-print (test)
-todraw = [x / count for x in test][1:]
-print ((end_time - start_time)/count)
-print (todraw)
-draw(todraw, 'Average transaction fees per hour')
-
-
-# [DEMO UPDATE] draw trends for a hour
-test = [0] * 60
-pre_t = "16/07/2017 6:00"
-
-for i in range(1, 60):
-    t = "16/07/2017 6:" + str(i)
-
-    test[i] = query(s, pre_t,  t)
-    print(test[i], 'query from',  pre_t, ' to ', t)
-    pre_t = t
-
-draw(test[1:])
+# start_dt = date(2017, 7, 9)
+# end_dt = date(2017, 7, 11)
+# test = [0] * 24
+# count = 0
+# start_time = time.time()
+# for dt in daterange(start_dt, end_dt):
+#     pre_t = dt.strftime("%d/%m/%Y") + ' 15:00'
+#     for i in range(1, 24):
+#         t = dt.strftime("%d/%m/%Y") + ' ' + str(i) +':00'
+#         test[i] += (query(s, pre_t, t))
+#         #print(test[-1], 'query from', pre_t, ' to ', t)
+#         pre_t = t
+#         count += 1
+# end_time = time.time()
+# print (test)
+# todraw = [x / count for x in test][1:]
+# print ((end_time - start_time)/count)
+# print (todraw)
+# draw(todraw, 'Average transaction fees per hour')
+#
+#
+# # [DEMO UPDATE] draw trends for a hour
+# test = [0] * 60
+# pre_t = "16/07/2017 6:00"
+#
+# for i in range(1, 60):
+#     t = "16/07/2017 6:" + str(i)
+#
+#     test[i] = query(s, pre_t,  t)
+#     print(test[i], 'query from',  pre_t, ' to ', t)
+#     pre_t = t
+#
+# draw(test[1:])
 
 
 #
