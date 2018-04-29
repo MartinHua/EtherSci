@@ -1,11 +1,11 @@
-from initial import masterPort,recvAll
+from initial import masterPort, recvAll, masterHost
 import socket
 import threading
 import pickle
 from random import randint
 import io
 
-Port =  randint(3000, 9000)
+Port = randint(3000, 9000)
 
 def parse(msg):
     if (msg != b''):
@@ -17,13 +17,13 @@ def parse(msg):
             except EOFError:
                 break
 def query(s,start,end):
-    msg = pickle.dumps(("query_topK_pairs",start,end))
+    msg = pickle.dumps(("query_txFee_Max",start,end))
     s.sendall(msg)
     return parse(recvAll(s))
 
 
 
-masterAddr = (socket.gethostname(),masterPort)
+masterAddr = (masterHost, masterPort)
 
 s=socket.socket()
 s.bind((socket.gethostname(), Port))

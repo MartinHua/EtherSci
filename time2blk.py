@@ -23,23 +23,23 @@ class time2blk: # store block info
         self.filledID += s
         print ('size of map ', len(self.map))
         for i in range(s):
-            idx =  offset + i - self.begin
+            idx = offset + i - self.begin
             #print ("store idx ", idx, offset+i, " ts ", data[offset+i]["timestamp"] )
             self.map[idx] = data[offset+i]["timestamp"]
         f.close()
 
-        print (self.map[0], self.map[self.filledID-1])
-        print ('current ability: ', time.ctime(self.map[0]),time.ctime(self.map[self.filledID-1]) )
+        print(self.map[0], self.map[self.filledID-1])
+        print('current ability: ', time.ctime(self.map[0]), time.ctime(self.map[self.filledID-1]) )
         return
-    def update(self, blk):
-        print()
-        self.map[self.filledID] = blk["timestamp"]
+
+    def update(self, timestamp):
+        self.map[self.filledID] = timestamp
         self.filledID += 1
+
     def getBlk(self, t):
 
-
         timestamp = time.mktime(datetime.datetime.strptime(t, "%d/%m/%Y %H:%M").timetuple())
-        timestamp_int= int(timestamp)
+        timestamp_int = int(timestamp)
 
         chk = timestamp_int
 
@@ -55,7 +55,8 @@ class time2blk: # store block info
 
         res = self.binarySearch(0, self.filledID-1, chk)
         return res
-    def binarySearch( self,l, r, x):
+
+    def binarySearch(self, l, r, x):
 
         # Check base case
         if r >= l:
@@ -74,7 +75,7 @@ class time2blk: # store block info
             # Else the element can only be present
             # in right subarray
             else:
-                return self.binarySearch( mid + 1, r, x)
+                return self.binarySearch(mid + 1, r, x)
 
         else:
             # Element is not present in the array, choose l value

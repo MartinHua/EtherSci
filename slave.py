@@ -6,7 +6,6 @@ import sys
 from random import randint
 from time2blk import time2blk
 from SegTree import *
-
 from initial import *
 
 #begin,offset, recvAll, sendAll, msgLength, script_dir,
@@ -40,26 +39,35 @@ class slave(threading.Thread):
         self.lock = threading.Lock()
         self.partition = partition
         # create a empty tree
+
         self.tree = blkSegTree(self.offset, treeSize)
         # offset (starting blk number), size of the tree
+
         self.mapping = time2blk(self.offset, mappingSize)
         # self.mapping.setBegin(self.offset)
 
 
         for i in range(loadFileNum):
             filename = str(self.offset) + '.p'
-            with open(script_dir + filename, 'rb') as f:
-                blks = pickle.load(f)
-                print ('open file', filename, 'check start data', blks[self.offset])
-                for idx in range(int(fileBlockNum/self.partition)):
-                    self.tree.update(self.getBlock(blks, idx))
-                self.mapping.buildMap(self.offset, filename)
-            self.offset += fileBlockNum
-            # print('current tree size', self.tree.size)
+            try:
+                with open(script_dir + filename, 'rb') as f:
+                    blks = pickle.load(f)
+                    blockLen = int(len(blks)/self.partition) + int(len(blks) % self.partition > self.sid)
+                    for idx in range(blockLen):
+                        blk = self.getBlock(blks, idx)
+                        self.tree.update(blk)
+                        self.mapping.update(blk["timestamp"])
+                        self.maxBlock = blk["blockNum"]
+                        self.maxTime = blk["timestamp"]
+                    # self.mapping.buildMap(self.offset, filename)
+                    self.offset += len(blks)
+            except:
+                print("No such file")
+                break
         threading.Thread.__init__(self)
         threading.Thread(target=self.listen_new_block, args=()).start()
-        self.sendBack("done")
-
+        print(self.maxBlock)
+        self.sendBack("done", (self.maxBlock, self.maxTime))
 
 
 
@@ -93,7 +101,7 @@ class slave(threading.Thread):
                         print(entry)
                         answer = self.query(entry[0], entry[2], entry[3])
                         print(answer)
-                        self.sendBack(entry[0], entry[1], answer)
+                        self.sendBack("answer", (entry[1], answer))
                     except EOFError:
                         break
 
@@ -107,33 +115,35 @@ class slave(threading.Thread):
             package, addr = self.updateSocket.accept()  # Establish connection with client.
             threading.Thread(target=self.on_update_block, args=(package,)).start()
 
-    def on_update_block(self,package):
+    def on_update_block(self, package):
         while True:
             rawblk = recvAll(package)
             blk = pickle.load(io.BytesIO(rawblk))
             self.tree.update(blk)
-            self.mapping.update(blk)
+            self.mapping.update(blk["timestamp"])
+            self.maxBlock = blk["blockNum"]
+            self.maxTime = blk["timestamp"]
+            self.sendBack("new", (blk["blockNum"], blk["timestamp"], blk["txFee"]))
             print(blk["blockNum"])
 
-    def sendBack(self, msgType, queryNum=None, answer=None):
-        sendAll(self.sendToMasterSocket, pickle.dumps((msgType, self.sid, queryNum, answer)), msgLength)
+    def sendBack(self, msgType, msg=None):
+        sendAll(self.sendToMasterSocket, pickle.dumps((msgType, self.sid, msg)), msgLength)
         return 0
 
     def query(self, queryType,startTime, endTime):
-        start = int(self.mapping.getBlk(startTime) / self.partition) #+ self.mapping.getBlk(startTime) % self.partition
-        end = int(self.mapping.getBlk(endTime) / self.partition) # + self.mapping.getBlk(endTime) % self.partition)
+        start = int(self.mapping.getBlk(startTime))
+        end = int(self.mapping.getBlk(endTime))
         try:
-            return eval("self.tree."+ queryType+"(self.begin + start, self.begin + end)")
+            return eval("self.tree." + queryType +"(self.begin + start, self.begin + end)")
         except:
             print("Error")
             return -1.0
-        #return self.tree.query_topK_addrs(self.begin + start, self.begin + end)
 
 
 if len(sys.argv)>1:
     s = slave(*(eval(s) for s in sys.argv[1:]))
     s.start()
-    # print('test', s.query(4000000, 4000100))
+    # print('test', s.query("13/07 14:00", "13/07 15:00"))
 else:
     s = slave(0, randint(5000, 10000), 1, 1)
     s.start()

@@ -5,6 +5,7 @@ import pickle
 import time
 from random import randint
 from initial import recvAll, sendAll, msgLength, slaveUpdateAddrs, slave_num
+import os
 
 class Updater(threading.Thread):
     def __init__(self, path='/scratch/cluster/xh3426/etherData/', addrs=None):
@@ -35,19 +36,13 @@ class Updater(threading.Thread):
                 self.sendSockets.append(s)
 
     def run(self):
-        # num = 5000000
-        # b = pickle.load(
-        #     open(self.path + str(5000000) + '.p', 'rb'))
         while self.updating:
             block = self.parser.getBlock(self.maxBlockNum)
-            # block = b[num]
-            # time.sleep(0.1)
             if block:
                 if self.send:
                     message = pickle.dumps(block)
                     sendAll(self.sendSockets[self.maxBlockNum % slave_num], message)
                     print(slaveUpdateAddrs[self.maxBlockNum % slave_num])
-                    # print(num)
                 self.parser.saveBlock(block)
                 self.maxBlockNum += 1
                 print(self.maxBlockNum, self.maxFileNum)
@@ -55,19 +50,21 @@ class Updater(threading.Thread):
                 if self.maxBlockNum % 1000 == 0:
                     self.parser.block = {}
                     self.maxFileNum += 1000
+                    pickle.dump(self.parser.block, open(self.path + str(self.maxFileNum) + ".p", "wb"))
+                    os.chmod(self.path + str(self.maxFileNum) + ".p", 0o777)
                 with open(self.path + 'update.log', 'w') as f:
                     f.write(str(self.maxFileNum) + "\n")
                     f.write(str(self.maxBlockNum) + "\n")
                     f.close()
             else:
                 time.sleep(5)
-            # num += 1
         return
 
 
 if __name__ == "__main__":
-    #slaveAddrs = [('idomeneo', 4000), ]
-    updater = Updater(addrs=slaveUpdateAddrs)
+
+    updater = Updater(addrs=None)
+
     if updater.maxBlockNum > 0:
         updater.start()
     # time.sleep(10)
