@@ -96,6 +96,20 @@ print (todraw)
 draw(todraw, 'Average transaction fees per hour')
 
 
+# [DEMO UPDATE] draw trends for a hour
+test = [0] * 60
+pre_t = "16/07/2017 6:00"
+
+for i in range(1, 60):
+    t = "16/07/2017 6:" + str(i)
+
+    test[i] = query(s, pre_t,  t)
+    print(test[i], 'query from',  pre_t, ' to ', t)
+    pre_t = t
+
+draw(test[1:])
+
+
 #
 # # draw trend for FX Fee in a day cumulating from a month
 # test = [0] * 24
