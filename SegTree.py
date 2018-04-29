@@ -231,6 +231,8 @@ class blkSegTree(object):
 
         return rangeHelper(i, j, self.root)
 
+
+
 '''
 
 if __name__ == "__main__":

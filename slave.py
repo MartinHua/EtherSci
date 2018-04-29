@@ -6,7 +6,7 @@ import sys
 from random import randint
 from time2blk import time2blk
 from SegTree import *
-from initial import recvAll, sendAll, msgLength, script_dir, masterListenFromSlaveAddr, updatePort, loadFileNum,fileBlockNum
+from initial import recvAll, sendAll, msgLength, script_dir, masterListenFromSlaveAddr, updatePort, loadFileNum,fileBlockNum,queryPort
 
 
 sendFromPort = randint(2602, 29999)
@@ -23,8 +23,8 @@ class slave(threading.Thread):
         self.message = ""
         self.Port = Port
         self.updatePort = updatePort
-        self.begin = 0 #4000000
-        self.offset = 0 #4000000
+        self.begin = 400000
+        self.offset = 4000000
         self.host = socket.gethostname()
 
         self.sendToMasterSocket = socket.socket()
@@ -36,9 +36,9 @@ class slave(threading.Thread):
         self.lock = threading.Lock()
         self.partition = partition
         # create a empty tree
-        self.tree = blkSegTree(self.offset, 600000)
+        self.tree = blkSegTree(self.offset, 20000)
         # offset (starting blk number), size of the tree
-        self.mapping = time2blk(self.offset, 6000000)
+        self.mapping = time2blk(self.offset, 200000)
         # self.mapping.setBegin(self.offset)
 
 
@@ -86,9 +86,10 @@ class slave(threading.Thread):
                 while True:
                     try:
                         entry = pickle.load(file)
-                        if entry[0] == "query":
-                            answer = self.query(entry[2], entry[3])
-                            self.sendBack("answer", entry[1], answer)
+                        print(entry)
+                        answer = self.query(entry[0], entry[2], entry[3])
+                        print(answer)
+                        self.sendBack(entry[0], entry[1], answer)
                     except EOFError:
                         break
 
@@ -114,10 +115,13 @@ class slave(threading.Thread):
         sendAll(self.sendToMasterSocket, pickle.dumps((msgType, self.sid, queryNum, answer)), msgLength)
         return 0
 
-    def query(self, startTime, endTime, rangeStart=1, rangeEnd=5):
+    def query(self, queryType,startTime, endTime):
         start = int(self.mapping.getBlk(startTime) / self.partition) #+ self.mapping.getBlk(startTime) % self.partition
         end = int(self.mapping.getBlk(endTime) / self.partition) # + self.mapping.getBlk(endTime) % self.partition)
-        return self.tree.query_txFee_Sum(self.begin + start, self.begin + end)
+        try:
+            return eval("self.tree."+ queryType+"(self.begin + start, self.begin + end)")
+        except:
+            return -1
         #return self.tree.query_topK_addrs(self.begin + start, self.begin + end)
 
 
@@ -128,5 +132,5 @@ if len(sys.argv)>1:
 else:
     s = slave(0, randint(5000, 10000), 1, 1)
     s.start()
-    print('test', s.query("13/07 14:00", "13/07 15:00"))
+    print('test', s.query("query","13/07 14:00", "13/07 15:00"))
 

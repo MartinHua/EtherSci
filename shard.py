@@ -55,7 +55,7 @@ class Master(threading.Thread):
 
                         if entry[0] == "done":
                             self.working.append(entry[1])
-                        elif entry[0] == "answer":
+                        else:
                             self.answerNum += 1
                             print(self.answerNum)
                             self.answer += entry[3]
@@ -74,18 +74,18 @@ class Master(threading.Thread):
                         print(entry)
                         # query type, start,end
                         command.sendall(pickle.dumps(
-                                                self.query(entry[1], entry[2])
+                                                self.query(entry[0],entry[1], entry[2])
                                                 )
                                         )
                     except EOFError:
                         break
 
-    def query(self, start, end):
+    def query(self, queryType,start, end):
         self.queryNum += 1
         self.answerNum = 0
         self.answer = 0.0
         for s in self.querySlaveSockets:
-            message = pickle.dumps(("query", self.queryNum, start, end))
+            message = pickle.dumps((queryType, self.queryNum, start, end))
             s.sendall(message)
         print(self.queryNum)
         while True:
