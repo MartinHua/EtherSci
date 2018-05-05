@@ -16,13 +16,14 @@ class Master(threading.Thread):
         print(socket.gethostname())
         self.queryNum = -1
         self.working = []
+
         self.answer = None
         self.answerNum = 0
         self.maxBlock = 0
         self.maxTime = 0
         threading.Thread(target=self.listen_answer, args=()).start()
         time.sleep(0.1)
-        os.system('bash slave.sh xh3426 10 ' + str(queryPort))
+        os.system('bash slave.sh cchsu 10 ' + str(queryPort))
         while len(self.working) < 10:
             time.sleep(0.5)
         print("Done!")
@@ -37,6 +38,8 @@ class Master(threading.Thread):
 
     def plot_initial(self):
         print(datetime.datetime.fromtimestamp(self.maxTime).strftime('%Y-%m-%d %H:%M:%S'))
+        self.plot_initial_day = datetime.datetime.fromtimestamp(self.maxTime).strftime('%m/%d/%Y ')
+
         # datetime.datetime.fromtimestamp(
         #     int("1284101485")
         # ).strftime('%Y-%m-%d %H:%M:%S')
@@ -47,7 +50,16 @@ class Master(threading.Thread):
 
     def plot_update(self, msg):
         print(msg)
+        #  transaction fees per hour for a certain day
+        test = [0] * 24
+        #day = "12/07/2017 "
+        pre_t = self.plot_initial_day + "0:00"
 
+        for i in range(1, 24):
+            t = self.plot_initial_day + str(i) + ":00"
+            test[i] = self.query('query_txFee_Sum', pre_t, t)
+            print(test[i], 'query from', pre_t, ' to ', t)
+            pre_t = t
 
     def listen_answer(self):
         listen = socket.socket()
@@ -143,3 +155,41 @@ if __name__ == "__main__":
     from initial import masterPort, slaveAddrs, masterListenFromSlaveAddr, recvAll, msgLength, queryPort, slaveUpdateAddrs
     master = Master(update=True)
     master.start()
+    #
+    # test = [0] * 24
+    # pre_t = "12/07/2017 0:00"
+    #
+    # for i in range(1, 24):
+    #     t = "12/07/2017 " + str(i) + ":00"
+    #     test[i] = master.query(pre_t, t)
+    #     print(test[i], 'query from', pre_t, ' to ', t)
+    #     pre_t = t
+    # from draw import *
+
+    # draw(test[1:])
+    #
+    #
+    # # draw trends for a year
+    # year = 2017
+    # list = [0] * 13
+    # pre_t = "1/1" + "/" + str(year) + " 00:00"
+    # for i in range(2, 13):
+    #     t = "1/" + str(i) + "/" + str(year) + " 00:00"
+    #     list[i] = master.query(pre_t, t)
+    #     pre_t = t
+    # from draw import *
+    # draw(list[1:])
+    #
+    # # draw trend for FX Fee in a day cumulating from a month
+    # test = [0] * 24
+    # pre_t = "1/07/2017 0:00"
+    # for j in range(2, 31):
+    #     for i in range(1, 24):
+    #         t = str(j) + "/07/2017 " + str(i) + ":00"
+    #
+    #         test[i] += master.query(pre_t, t)
+    #         print(test[i], 'query from', pre_t, ' to ', t)
+    #         pre_t = t
+    # from draw import *
+    #
+    # draw(test[1:])
