@@ -13,27 +13,25 @@ import time
 # change to you local file
 # use the following command
 #print(os.getcwd())
-root_dir = "/u/fuli2015/PycharmProjects/EtherSci/"
+root_dir = "/u/xh3426/cs380D/EtherSci/"
 
 ############################################################
 
-#begin and offset in slave
-begin = 4000000
-offset = 4000000
+
+counter =int(open(root_dir + "123.txt", 'r').readline())
+# begin and offset in slave
+begin = 5486000
+offset = 5486000
 
 #
-treeSize = 6000
-mappingSize = 60000
+treeSize = 600000
+mappingSize = 600000
 
-
-
-
-counter =int(open(root_dir + "123.txt",'r').readline())
 
 print(counter)
 masterPort = counter -1
 
-loadFileNum = 10
+loadFileNum = 1
 fileBlockNum = 1000
 
 
@@ -46,7 +44,8 @@ slaveAddrs = [(host, queryPort) for host in slaveHosts]
 updatePort = counter+5
 slaveUpdateAddrs = [(host, updatePort) for host in slaveHosts]
 
-masterListenFromSlaveAddr = ('rhinoceros-beetle', counter+10)
+masterHost = 'narsil-2'
+masterListenFromSlaveAddr = (masterHost, counter+10)
 print(masterListenFromSlaveAddr)
 
 script_dir = '/scratch/cluster/xh3426/etherData/'
