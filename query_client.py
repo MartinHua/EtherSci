@@ -23,8 +23,8 @@ def parse(msg):
 #query_topK_tx
 #query_topK_addrs
 #query_topK_pairs
-def query(s,start,end):
-    msg = pickle.dumps(("query_topK_pairs",start,end))
+def query(s,start,end, type = 'query_topK_pairs' ):
+    msg = pickle.dumps((type,start,end))
     s.sendall(msg)
     return parse(recvAll(s))
 
