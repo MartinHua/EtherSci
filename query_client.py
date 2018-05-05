@@ -23,7 +23,7 @@ def parse(msg):
 #query_topK_tx
 #query_topK_addrs
 #query_topK_pairs
-def query(s,start,end, type = 'query_topK_pairs' ):
+def query(s,start,end, type = 'query_txFee_Sum' ):
     msg = pickle.dumps((type,start,end))
     s.sendall(msg)
     return parse(recvAll(s))
@@ -50,15 +50,16 @@ def daterange(date1, date2):
 
 print("GH")
 print (query(s,"10/07/2017 20:00","11/07/2017 22:00"))
+
 # # (1) transaction fees per day for a year
 # start_dt = date(2017, 1, 1)
-# end_dt = date(2017, 7, 31)
+# end_dt = date(2017, 1, 31)
 # test = []
 # pre_t = "1/7/2017 0:00"
 # x = []
 # for dt in daterange(start_dt, end_dt):
 #     t = dt.strftime("%d/%m/%Y") + ' 0:00'
-#     test.append(query(s, pre_t, t))
+#     test.append(query(s, pre_t, t, 'query_txFee_Sum'))
 #     print(test[-1], 'query from', pre_t, ' to ', t)
 #     pre_t = t
 #     x.append(dt.strftime("%d/%m/%Y"))
@@ -69,11 +70,11 @@ print (query(s,"10/07/2017 20:00","11/07/2017 22:00"))
 #
 # # (2) transaction fees per hour for a certain day
 # test = [0] * 24
-# pre_t = "12/07/2017 0:00"
+# pre_t = "19/01/2017 0:00"
 #
 # for i in range(1, 24):
-#     t = "12/07/2017 " + str(i) + ":00"
-#     test[i] = query(s, pre_t, t)
+#     t = "19/01/2017 " + str(i) + ":00"
+#     test[i] = query(s, pre_t, t, 'query_txFee_Sum')
 #     print(test[i], 'query from', pre_t, ' to ', t)
 #     pre_t = t
 # from draw import *
@@ -81,9 +82,9 @@ print (query(s,"10/07/2017 20:00","11/07/2017 22:00"))
 # draw(test[1:])
 
 #(3) transaction fees per hour cumuating from a month
-
-# start_dt = date(2017, 7, 9)
-# end_dt = date(2017, 7, 11)
+#
+# start_dt = date(2017, 1, 19)
+# end_dt = date(2017, 1, 31)
 # test = [0] * 24
 # count = 0
 # start_time = time.time()
@@ -91,7 +92,7 @@ print (query(s,"10/07/2017 20:00","11/07/2017 22:00"))
 #     pre_t = dt.strftime("%d/%m/%Y") + ' 15:00'
 #     for i in range(1, 24):
 #         t = dt.strftime("%d/%m/%Y") + ' ' + str(i) +':00'
-#         test[i] += (query(s, pre_t, t))
+#         test[i] += (query(s, pre_t, t, 'query_txFee_Sum'))
 #         #print(test[-1], 'query from', pre_t, ' to ', t)
 #         pre_t = t
 #         count += 1
@@ -104,22 +105,39 @@ print (query(s,"10/07/2017 20:00","11/07/2017 22:00"))
 #
 
 
-# (4) Scattor Plot for Top K fees
+# (4) Scattor Plot for Top K fees per month for 2017
 
+# test = []
+# pre_t = "1/1/2017 0:00"
+# topK = 5
+# for i in range(1,13):
+#     t = "1/" + str(i) +'/2017 0:00'
+#     res = query(s,pre_t, t, 'query_topK_tx')
+#     if res == []:
+#         test.append([0]*topK)
+#     else:
+#         res=[x[1] for x in res]
+#         test.append(res)
+#     pre_t = t
+# draw_scattor(test)
+
+
+
+# (5) Average TX Fee per month for 2017
 test = []
 pre_t = "1/1/2017 0:00"
 topK = 5
 for i in range(1,13):
     t = "1/" + str(i) +'/2017 0:00'
-    res = query(s,pre_t, t)
-    if res == []:
-        test.append([0]*topK)
-    else:
-        res=[x[1] for x in res]
-        test.append(res)
-    pre_t = t
-draw_scattor(test)
 
+    sum = query(s,pre_t, t, 'query_txFee_Sum')
+    num = query(s, pre_t, t, 'query_txFee_Num')
+    if num == 0:
+        test.append(0)
+    else:
+        test.append(sum / num)
+    pre_t = t
+draw(test, 'Average TX Fee per month for 2017')
 
 #
 # # [DEMO UPDATE] draw trends for a hour
