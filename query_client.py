@@ -1,11 +1,11 @@
-from initial import masterPort, recvAll, masterHost
+from initial import masterPort,recvAll
 import socket
 import threading
 import pickle
 from random import randint
 import io
 
-Port = randint(3000, 9000)
+Port =  randint(3000, 9000)
 
 def parse(msg):
     if (msg != b''):
@@ -17,11 +17,12 @@ def parse(msg):
             except EOFError:
                 break
 def query(s,start,end):
-    msg = pickle.dumps(("query_txFee_Max",start,end))
+    msg = pickle.dumps(("query_topK_tx", start,end))
     s.sendall(msg)
     return parse(recvAll(s))
-
-
+# query_txFee_Num  query_txFee_Max query_txFee_Sum query_txFee_Sum
+# query_topK_tx query_topK_addrs query_topK_pairs
+# query_txFee_range
 
 masterAddr = (masterHost, masterPort)
 
@@ -95,6 +96,26 @@ print (query(s,"10/07/2017 20:00","11/07/2017 22:00"))
 # print (todraw)
 # draw(todraw, 'Average transaction fees per hour')
 #
+
+
+# (4) Scattor Plot for Top K fees
+start_dt = date(2017, 7, 2)
+end_dt = date(2017, 7, 31)
+test = []
+pre_t = "1/7/2017 0:00"
+topK = 5
+for dt in daterange(start_dt, end_dt):
+    t = dt.strftime("%d/%m/%Y") + ' 0:00'
+    res = s.query(pre_t, t)
+    if res == []:
+        test.append([0]*topK)
+    else:
+        res=[x[1] for x in res]
+        test.append(res)
+    pre_t = t
+draw_scattor(test)
+
+
 #
 # # [DEMO UPDATE] draw trends for a hour
 # test = [0] * 60
