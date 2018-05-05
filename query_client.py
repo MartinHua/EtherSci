@@ -1,4 +1,4 @@
-from initial import masterPort,recvAll
+from initial import masterPort,recvAll,masterHost
 import socket
 import threading
 import pickle
@@ -99,14 +99,13 @@ print (query(s,"10/07/2017 20:00","11/07/2017 22:00"))
 
 
 # (4) Scattor Plot for Top K fees
-start_dt = date(2017, 7, 2)
-end_dt = date(2017, 7, 31)
+
 test = []
-pre_t = "1/7/2017 0:00"
+pre_t = "1/1/2017 0:00"
 topK = 5
-for dt in daterange(start_dt, end_dt):
-    t = dt.strftime("%d/%m/%Y") + ' 0:00'
-    res = s.query(pre_t, t)
+for i in range(1,13):
+    t = "1/" + str(i) +'/2017 0:00'
+    res = query(s,pre_t, t)
     if res == []:
         test.append([0]*topK)
     else:
