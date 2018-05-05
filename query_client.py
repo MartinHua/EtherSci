@@ -13,11 +13,18 @@ def parse(msg):
         while True:
             try:
                 entry = pickle.load(file)
+                print(entry)
                 return entry
             except EOFError:
                 break
+
+
+#query_txFee_range
+#query_topK_tx
+#query_topK_addrs
+#query_topK_pairs
 def query(s,start,end):
-    msg = pickle.dumps(("query_txFee_Max",start,end))
+    msg = pickle.dumps(("query_topK_pairs",start,end))
     s.sendall(msg)
     return parse(recvAll(s))
 

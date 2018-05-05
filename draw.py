@@ -30,11 +30,20 @@ def draw_year(list, title = 'Transaction Fees (per block)', x = None):
     plt.grid(True)
     plt.show()
 
-def draw(list, title = 'Transaction Fees (per block)', x = None):
+def draw(list, title = 'Transaction Fees (per block)', x_axis = None):
     sns.set_style("darkgrid")
     plt.plot(list)
     plt.xlabel('time')
     plt.ylabel('Transaction Fees')
     plt.title(title)
+    plt.grid(True)
+    plt.show()
+
+def draw_scattor(lists, title = 'Transaction Fees per Month'):
+    sns.set_style("darkgrid")
+    sns.swarmplot(data=lists)
+    plt.title(title)
+    plt.xlabel('time')
+    plt.ylabel('Transaction Fees')
     plt.grid(True)
     plt.show()
