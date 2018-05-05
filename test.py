@@ -14,6 +14,11 @@ from initial import recvAll, sendAll, msgLength, script_dir
 
 # script_dir = os.path.dirname(os.path.dirname(__file__))+'/EtherData-master/'
 
+a = 1
+b = None
+b+=1
+print(b)
+
 
 updatePort = 4000
 
