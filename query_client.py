@@ -1,11 +1,11 @@
-from initial import masterPort,recvAll,masterHost
+from initial import masterPort, recvAll, masterHost
 import socket
 import threading
 import pickle
 from random import randint
 import io
 
-Port =  randint(3000, 9000)
+Port = randint(3000, 9000)
 
 def parse(msg):
     if (msg != b''):
@@ -13,16 +13,22 @@ def parse(msg):
         while True:
             try:
                 entry = pickle.load(file)
+                print(entry)
                 return entry
             except EOFError:
                 break
+
+
+#query_txFee_range
+#query_topK_tx
+#query_topK_addrs
+#query_topK_pairs
 def query(s,start,end):
-    msg = pickle.dumps(("query_topK_tx", start,end))
+    msg = pickle.dumps(("query_topK_pairs",start,end))
     s.sendall(msg)
     return parse(recvAll(s))
-# query_txFee_Num  query_txFee_Max query_txFee_Sum query_txFee_Sum
-# query_topK_tx query_topK_addrs query_topK_pairs
-# query_txFee_range
+
+
 
 masterAddr = (masterHost, masterPort)
 
