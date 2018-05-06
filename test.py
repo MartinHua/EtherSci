@@ -12,41 +12,93 @@ import datetime
 from initial import recvAll, sendAll, msgLength, script_dir
 
 
+
+from io import BytesIO
+
+
+
+
+from bottle import run, get, HTTPResponse
+from matplotlib.figure import Figure
+from matplotlib.backends.backend_agg import FigureCanvasAgg
+
+i = 0
+i = i+1
+
+# fig = pickle.load(open('/u/xh3426/cs380D/EtherSci/png.p','rb'))
+# fig.show()
+
+# fig = Figure(figsize=[i,i])
+# ax = fig.add_axes([.1,.1,.8,.8])
+# ax.scatter([0.2, 0.3], [0.25, 0.35])
+# canvas = FigureCanvasAgg(fig)
+#
+# buf = BytesIO()
+# canvas.print_png(buf)
+# data = buf.getvalue()
+# print(len(data))
+import imageio
+
+
+@get('/')
+def hello():
+    buf = imageio.imread('/u/xh3426/cs380D/EtherSci/realtime.png')
+    # fig.show()
+    # canvas = FigureCanvasAgg(fig)
+    #
+    #
+    # buf = BytesIO()
+    # canvas.print_png(buf)
+    data = buf.getvalue()
+    headers = {
+        'Content-Type': 'image/png',
+        'Content-Length': len(data)
+        # '<meta http-equiv="refresh" content="1" />'
+    }
+    return HTTPResponse(body=data, headers=headers,)
+
+run(port=8081)
+
 # script_dir = os.path.dirname(os.path.dirname(__file__))+'/EtherData-master/'
+# import webbrowser
+#
+# webbrowser.open('file:///u/fuli2015/Screenshot%20from%202018-04-17%2013-53-00.png')
+# a = 1
+# b = None
+#
+# b= [2]
+# #a= {1:1,2:2}
+# print(type(a))
+# print(type(a) == int)
+# #print(b+a.items())
 
-a = 1
-b = None
-b+=1
-print(b)
-
-
-updatePort = 4000
-
-host = socket.gethostname()
-sendToAddr = (host, updatePort)
-offset = 4030000
-filename = str(offset) + '.p'
-
-with open(script_dir + filename, 'rb') as f:
-        blks = pickle.load(f)
-s = socket.socket()
-s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-s.bind((host, randint(30000, 40000)))
-s.connect(sendToAddr)
-
-
-filename = str(offset) + '.p'
-with open(script_dir + filename, 'rb') as f:
-    blks = pickle.load(f)
-    for i in range(20):
-
-        # print ('open file', filename, 'check start data', blks[self.offset])
-        sendAll(s, pickle.dumps(blks[offset + i]))
-        time.sleep(1)
-    #offset += 1000
-
-
-
+# updatePort = 4000
+#
+# host = socket.gethostname()
+# sendToAddr = (host, updatePort)
+# offset = 4030000
+# filename = str(offset) + '.p'
+#
+# with open(script_dir + filename, 'rb') as f:
+#         blks = pickle.load(f)
+# s = socket.socket()
+# s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+# s.bind((host, randint(30000, 40000)))
+# s.connect(sendToAddr)
+#
+#
+# filename = str(offset) + '.p'
+# with open(script_dir + filename, 'rb') as f:
+#     blks = pickle.load(f)
+#     for i in range(20):
+#
+#         # print ('open file', filename, 'check start data', blks[self.offset])
+#         sendAll(s, pickle.dumps(blks[offset + i]))
+#         time.sleep(1)
+#     #offset += 1000
+#
+#
+#
 
 
 
