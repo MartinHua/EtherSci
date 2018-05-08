@@ -23,13 +23,14 @@ class Master(threading.Thread):
         self.maxTime = 0
         threading.Thread(target=self.listen_answer, args=()).start()
         time.sleep(0.1)
-        os.system('bash slave.sh cchsu 10 ' + str(queryPort))
+        os.system('bash slave.sh xh3426 10 ' + str(queryPort))
         while len(self.working) < 10:
             time.sleep(0.5)
         print("Done!")
         self.plot_initial()
         self.querySlaveSockets = []
         for addr in slaveAddrs:
+            print(addr)
             s = socket.socket()
             s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             s.bind((socket.gethostname(), randint(20000, 40000)))
@@ -60,7 +61,7 @@ class Master(threading.Thread):
             test[i] = self.query('query_txFee_Sum', pre_t, t)
             print(test[i], 'query from', pre_t, ' to ', t)
             pre_t = t
-
+        #draw(test)
     def listen_answer(self):
         listen = socket.socket()
         listen.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -93,8 +94,8 @@ class Master(threading.Thread):
                                     self.answer = 0.0
                                 else:
                                     self.answer = []
-                            if type(msg[1]) == dict():
-                                self.answer += msg[1].items()
+                            if type(msg[1]) == type({}):
+                                self.answer += list(msg[1].items())
                                 self.answerNum += 1
                                 continue
                             self.answerNum += 1
@@ -140,7 +141,7 @@ class Master(threading.Thread):
         listen = socket.socket()
         listen.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         listen.bind((socket.gethostname(), masterPort))
-        listen.listen(12)
+        listen.listen(20)
 
         while True:
             t, addr = listen.accept()
@@ -153,7 +154,7 @@ if __name__ == "__main__":
     out.close()
     print(int(open("123.txt", 'r').readline()))
     from initial import masterPort, slaveAddrs, masterListenFromSlaveAddr, recvAll, msgLength, queryPort, slaveUpdateAddrs
-    master = Master(update=True)
+    master = Master(update=False)
     master.start()
     #
     # test = [0] * 24

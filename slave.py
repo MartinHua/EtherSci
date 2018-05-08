@@ -49,6 +49,8 @@ class slave(threading.Thread):
 
         for i in range(loadFileNum):
             filename = str(self.offset) + '.p'
+            if i % 100 == 99:
+                print(i)
             try:
                 with open(script_dir + filename, 'rb') as f:
                     blks = pickle.load(f)
