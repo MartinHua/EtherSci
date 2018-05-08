@@ -20,8 +20,8 @@ root_dir = "/u/xh3426/cs380D/EtherSci/"
 
 counter =int(open(root_dir + "123.txt", 'r').readline())
 # begin and offset in slave
-begin = 3000000
-offset = 3000000
+begin = 4000000
+offset = 4000000
 
 #
 treeSize = 1200000
@@ -31,13 +31,13 @@ mappingSize = 1200000
 print(counter)
 masterPort = counter - 1
 
-loadFileNum = 1000
+loadFileNum = 100
 fileBlockNum = 1000
 
 
 slave_num = 10
-slaveId = [3, 4, 5, 6, 7, 8, 10, 11, 12, 13]
-slaveHosts = ["narsil-"+str(i) for i in slaveId]
+slaveId = [4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
+slaveHosts = ["narsil-"+str(i) for i in slaveId[:slave_num]]
 
 queryPort = counter
 slaveAddrs = [(host, queryPort) for host in slaveHosts]

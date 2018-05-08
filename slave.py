@@ -100,9 +100,9 @@ class slave(threading.Thread):
                 while True:
                     try:
                         entry = pickle.load(file)
-                        print(entry)
+                        # print(entry)
                         answer = self.query(entry[0], entry[2], entry[3])
-                        print(answer)
+                        # print(answer)
                         self.sendBack("answer", (entry[1], answer))
                     except EOFError:
                         break
@@ -133,9 +133,10 @@ class slave(threading.Thread):
         return 0
 
     def query(self, queryType,startTime, endTime):
-        start = int(self.mapping.getBlk(startTime))
-        end = int(self.mapping.getBlk(endTime))
         try:
+            # print(startTime, endTime)
+            start = int(self.mapping.getBlk(startTime))
+            end = int(self.mapping.getBlk(endTime))
             return eval("self.tree." + queryType +"(self.begin + start, self.begin + end)")
         except:
             print("Error")
