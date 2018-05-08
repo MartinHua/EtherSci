@@ -1,5 +1,5 @@
-topK = 5
-topKTx = 5
+topK = 100
+topKTx = 100
 from collections import Counter
 
 

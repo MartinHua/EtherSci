@@ -20,23 +20,24 @@ root_dir = "/u/xh3426/cs380D/EtherSci/"
 
 counter =int(open(root_dir + "123.txt", 'r').readline())
 # begin and offset in slave
-begin = 5486000
-offset = 5486000
+begin = 4000000
+offset = 4000000
 
 #
-treeSize = 600000
-mappingSize = 600000
+treeSize = 1200000
+mappingSize = 1200000
 
 
 print(counter)
-masterPort = counter -1
+masterPort = counter - 1
 
-loadFileNum = 1
+loadFileNum = 100
 fileBlockNum = 1000
 
 
 slave_num = 10
-slaveHosts = ["narsil-"+str(i) for i in range(3, 3+slave_num)]
+slaveId = [4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
+slaveHosts = ["narsil-"+str(i) for i in slaveId[:slave_num]]
 
 queryPort = counter
 slaveAddrs = [(host, queryPort) for host in slaveHosts]
@@ -48,6 +49,7 @@ masterHost = 'narsil-2'
 masterListenFromSlaveAddr = (masterHost, counter+10)
 print(masterListenFromSlaveAddr)
 
+print((masterHost, masterPort))
 script_dir = '/scratch/cluster/xh3426/etherData/'
 #script_dir = os.path.dirname(os.path.dirname(__file__))+'/EtherData-master/'
 

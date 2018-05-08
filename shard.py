@@ -7,6 +7,9 @@ import sys
 import pickle
 import time
 import datetime
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
 
 class Master(threading.Thread):
 
@@ -16,51 +19,58 @@ class Master(threading.Thread):
         print(socket.gethostname())
         self.queryNum = -1
         self.working = []
-
         self.answer = None
         self.answerNum = 0
         self.maxBlock = 0
         self.maxTime = 0
         threading.Thread(target=self.listen_answer, args=()).start()
         time.sleep(0.1)
-        os.system('bash slave.sh cchsu 10 ' + str(queryPort))
-        while len(self.working) < 10:
+        os.system('bash slave.sh xh3426 ' + str(slave_num) + ' ' + str(queryPort))
+        start = time.time()
+        while len(self.working) < slave_num:
             time.sleep(0.5)
         print("Done!")
-        self.plot_initial()
+        print("Total time: ", time.time()-start)
+
         self.querySlaveSockets = []
         for addr in slaveAddrs:
+            print(addr)
             s = socket.socket()
             s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             s.bind((socket.gethostname(), randint(20000, 40000)))
             s.connect(addr)
             self.querySlaveSockets.append(s)
+        # self.plot_initial()
 
     def plot_initial(self):
         print(datetime.datetime.fromtimestamp(self.maxTime).strftime('%Y-%m-%d %H:%M:%S'))
         self.plot_initial_day = datetime.datetime.fromtimestamp(self.maxTime).strftime('%m/%d/%Y ')
 
-        # datetime.datetime.fromtimestamp(
-        #     int("1284101485")
-        # ).strftime('%Y-%m-%d %H:%M:%S')
-        #
-        # for i in range(60):
-        #     start
-        #     self.query("query_txFee_range", )
-
-    def plot_update(self, msg):
-        print(msg)
-        #  transaction fees per hour for a certain day
-        test = [0] * 24
-        #day = "12/07/2017 "
+        self.test = [0] * (6 * 24 - 1)
         pre_t = self.plot_initial_day + "0:00"
-
-        for i in range(1, 24):
-            t = self.plot_initial_day + str(i) + ":00"
-            test[i] = self.query('query_txFee_Sum', pre_t, t)
-            print(test[i], 'query from', pre_t, ' to ', t)
+        self.t = []
+        for i in range(1, 24*6):
+            t = self.plot_initial_day + str(int(i / 6)) + ":" + str(int(i % 6)) + "0"
+            self.test[i-1] = self.query('query_txFee_Sum', pre_t, t)
+            self.t.append(datetime.datetime.strptime(pre_t, '%m/%d/%Y %H:%M'))
             pre_t = t
 
+
+    def plot_update(self, msg):
+        self.maxTime = max(self.maxTime, msg[1])
+        self.index = int(((msg[1]-6*60*60) % (24*60*60)) / 600)
+        self.test[self.index] += msg[2]
+        print(msg[0] % 10)
+        if msg[0] % 10 == 0:
+            print(msg)
+            plt.figure(figsize=(10, 10))
+            plt.plot(self.t[:self.index+1], self.test[:self.index+1])
+            plt.xlim((self.t[0], self.t[142]))
+            plt.savefig("realtime.png")
+            plt.clf()
+        # pickle.dump(p, open("/u/xh3426/cs380D/EtherSci/png.p", "wb"))
+
+        
     def listen_answer(self):
         listen = socket.socket()
         listen.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -79,7 +89,7 @@ class Master(threading.Thread):
                 while True:
                     try:
                         entry = pickle.load(file)
-                        print(entry)
+                        # print(entry)
                         msgType = entry[0]
                         msg = entry[2]
                         slaveId = entry[1]
@@ -91,10 +101,12 @@ class Master(threading.Thread):
                             if self.answerNum == 0:
                                 if type(msg[1]) == float:
                                     self.answer = 0.0
+                                elif type(msg[1]) == int:
+                                    self.answer = 0
                                 else:
                                     self.answer = []
-                            if type(msg[1]) == dict():
-                                self.answer += msg[1].items()
+                            if type(msg[1]) == type({}):
+                                self.answer += list(msg[1].items())
                                 self.answerNum += 1
                                 continue
                             self.answerNum += 1
@@ -113,7 +125,7 @@ class Master(threading.Thread):
                 while True:
                     try:
                         entry = pickle.load(file)
-                        print(entry)
+                        # print(entry)
                         # query type, start,end
                         command.sendall(
                             pickle.dumps(self.query(entry[0], entry[1], entry[2]))
@@ -127,9 +139,9 @@ class Master(threading.Thread):
         for s in self.querySlaveSockets:
             message = pickle.dumps((queryType, self.queryNum, start, end))
             s.sendall(message)
-        print(self.queryNum)
+        # print(self.queryNum)
         while True:
-            if self.answerNum == 10:
+            if self.answerNum == slave_num:
                 return self.answer
 
     def run(self):
@@ -140,7 +152,7 @@ class Master(threading.Thread):
         listen = socket.socket()
         listen.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         listen.bind((socket.gethostname(), masterPort))
-        listen.listen(12)
+        listen.listen(50)
 
         while True:
             t, addr = listen.accept()
@@ -152,8 +164,8 @@ if __name__ == "__main__":
     out.write(str(randint(4000, 9000)))
     out.close()
     print(int(open("123.txt", 'r').readline()))
-    from initial import masterPort, slaveAddrs, masterListenFromSlaveAddr, recvAll, msgLength, queryPort, slaveUpdateAddrs
-    master = Master(update=True)
+    from initial import slave_num, masterPort, slaveAddrs, masterListenFromSlaveAddr, recvAll, msgLength, queryPort, slaveUpdateAddrs
+    master = Master(update=False)
     master.start()
     #
     # test = [0] * 24
